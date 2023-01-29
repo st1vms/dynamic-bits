@@ -1,0 +1,22 @@
+# VS Code
+.vscode
+.vscode/
+
+# Build files
+*.o
+*.a
+*.so
+*.out
+build/
+
+# Test files
+test
+test.*
+main.c
+
+# Debug
+*debug*
+
+# CMake
+*.old
+Makefile*
