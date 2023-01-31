@@ -32,7 +32,7 @@ extern "C"
      * @param packet_out dpacket_t destination pointer reference, NULL initialized
      * @return 1 on success, 0 in case of errors.
      */
-    extern char DeserializeBuffer(unsigned char *buffer, const size_t buffer_size, const size_t n_bytes, dpacket_t packet_out);
+    extern char DeserializeBuffer(unsigned char *buffer, const size_t buffer_size, dpacket_t packet_out);
 
 #ifdef __cplusplus
 }
