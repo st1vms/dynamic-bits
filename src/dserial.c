@@ -92,6 +92,29 @@ char SerializeUInt(UInt64 uval,
     return 1;
 }
 
+char SerializeBoolean(Boolean boolv,
+                    unsigned char *buffer_p,
+                    size_t buffer_size,
+                    size_t *size_off,
+                    unsigned char *bit_off)
+{
+    if (NULL == buffer_p || buffer_size == 0 ||
+        NULL == size_off || NULL == bit_off || *bit_off > 8)
+    {
+        return 0;
+    }
+
+    SizeIncrementCheck(size_off, buffer_size, bit_off);
+
+    if(boolv > 0){
+        buffer_p[*size_off] |= (1 << *bit_off);
+    }
+
+    *bit_off += 1;
+
+    return 1;
+}
+
 static char DeserializeArgCheck(const unsigned char *buffer,
                                 size_t *m_bytes,
                                 size_t *bit_count,
@@ -144,6 +167,23 @@ static unsigned char *IncrementUnsignedInteger(unsigned char *buffer,
         }
         *bit_count += 1;
     }
+    return buffer;
+}
+
+unsigned char *DeserializeBoolean(unsigned char *buffer,
+                                size_t *m_bytes,
+                                size_t *bit_count,
+                                Boolean *out)
+{
+    if (out == NULL || !DeserializeArgCheck(buffer, m_bytes, bit_count, 1))
+    {
+        return NULL;
+    }
+
+    ByteIncrementCheck(&buffer, bit_count, m_bytes);
+
+    *out = (*buffer & __BIT_MASKS[*bit_count]) ? 1 : 0;
+    *bit_count += 1;
     return buffer;
 }
 

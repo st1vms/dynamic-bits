@@ -48,6 +48,14 @@ char SerializePacket(unsigned char *buffer, size_t buffer_size, dpacket_t packet
     {
         switch (node->stype)
         {
+        case BOOLEAN_STYPE:
+            // Serialize Boolean
+            if (!SerializeBoolean(node->data.boolean_v, buffer, buffer_size, out_size, &bit_off))
+            {
+                *out_size = 0;
+                return 0;
+            }
+            break;
         case UINT8_STYPE:
             // Serialize UINT8 header
             if (!(header_bitsize = GetUIntBitsize(node->data.numerical_v.u8_v)))
@@ -165,6 +173,17 @@ char DeserializeBuffer(unsigned char *buffer, const size_t buffer_size, dpacket_
 
         switch (*packet_format)
         {
+        case BOOLEAN_STYPE:
+
+            data.boolean_v = 0;
+            if (NULL == (buffer = DeserializeBoolean(buffer, &n, &bit_count, &(data.boolean_v))) ||
+                !AddSerializable(packet_out, BOOLEAN_STYPE, data))
+            {
+                FreePacket(packet_out);
+                return 0;
+            }
+
+            break;
         case UINT8_STYPE:
 
             data.numerical_v.u8_v = 0;

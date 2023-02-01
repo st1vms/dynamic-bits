@@ -6,7 +6,7 @@
 extern "C"
 {
 #endif
-    
+
     char SerializeNumericalHeader(UInt8 header_value,
                                   data_header_size_t header_size,
                                   unsigned char *buffer_p,
@@ -19,6 +19,17 @@ extern "C"
                        size_t buffer_size,
                        size_t *size_off,
                        unsigned char *bit_off);
+
+    char SerializeBoolean(Boolean boolv,
+                       unsigned char *buffer_p,
+                       size_t buffer_size,
+                       size_t *size_off,
+                       unsigned char *bit_off);
+
+    unsigned char *DeserializeBoolean(unsigned char *buffer,
+                                    size_t *m_bytes,
+                                    size_t *bit_count,
+                                    Boolean *out);
 
     unsigned char *DeserializeUInt8(unsigned char *buffer,
                                     size_t *m_bytes,
