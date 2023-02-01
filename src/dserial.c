@@ -11,8 +11,9 @@ static const unsigned char __BIT_MASKS[8] = {
     (0x80),
 };
 
+static void SizeIncrementCheck(size_t *size_off, size_t buffer_size, unsigned char *bit_off)
+{
 
-static void SizeIncrementCheck(size_t *size_off, size_t buffer_size, unsigned char *bit_off){
     if (*bit_off == 8 && *size_off < buffer_size)
     {
         *bit_off = 0;
@@ -20,15 +21,14 @@ static void SizeIncrementCheck(size_t *size_off, size_t buffer_size, unsigned ch
     }
 }
 
-
 char SerializeNumericalHeader(UInt8 header_value,
-                                     data_header_size_t header_size,
-                                     unsigned char *buffer_p,
-                                     size_t buffer_size,
-                                     size_t *size_off,
-                                     unsigned char *bit_off)
+                              data_header_size_t header_size,
+                              unsigned char *buffer_p,
+                              size_t buffer_size,
+                              size_t *size_off,
+                              unsigned char *bit_off)
 {
-    if (header_value == 0 || header_value > 8 || header_size == NO_HEADER || header_size > HEADER64_SIZE ||
+    if (header_value == 0 || header_size == NO_HEADER || header_size > HEADER64_SIZE ||
         NULL == buffer_p || NULL == size_off || NULL == bit_off || *bit_off > 8 || buffer_size == 0)
     {
         return 0;
@@ -45,7 +45,7 @@ char SerializeNumericalHeader(UInt8 header_value,
         {
             if (header_value & 1)
             {
-                buffer_p[*size_off - 1] |= (1 << *bit_off);
+                buffer_p[*size_off] |= (1 << *bit_off);
             }
             header_value >>= 1;
         }
@@ -57,10 +57,10 @@ char SerializeNumericalHeader(UInt8 header_value,
 }
 
 char SerializeUInt(UInt64 uval,
-                          unsigned char *buffer_p,
-                          size_t buffer_size,
-                          size_t *size_off,
-                          unsigned char *bit_off)
+                   unsigned char *buffer_p,
+                   size_t buffer_size,
+                   size_t *size_off,
+                   unsigned char *bit_off)
 {
 
     if (NULL == buffer_p || buffer_size == 0 ||
@@ -83,7 +83,7 @@ char SerializeUInt(UInt64 uval,
 
         if (uval & 1)
         {
-            buffer_p[*size_off - 1] |= (1 << *bit_off);
+            buffer_p[*size_off] |= (1 << *bit_off);
         }
         uval >>= 1;
         *bit_off += 1;
@@ -91,7 +91,6 @@ char SerializeUInt(UInt64 uval,
 
     return 1;
 }
-
 
 static char DeserializeArgCheck(const unsigned char *buffer,
                                 size_t *m_bytes,
@@ -106,8 +105,10 @@ static char DeserializeArgCheck(const unsigned char *buffer,
     return 1;
 }
 
-static void ByteIncrementCheck(unsigned char **buffer, size_t *bit_count, size_t* m_bytes){
-    if (buffer != NULL && *bit_count >= 8 && *m_bytes > 1)
+static void ByteIncrementCheck(unsigned char **buffer, size_t *bit_count, size_t *m_bytes)
+{
+    if (buffer != NULL && bit_count != NULL && m_bytes != NULL &&
+        *bit_count >= 8 && *m_bytes > 0)
     {
         *buffer += 1;
         *m_bytes -= 1;
@@ -115,44 +116,94 @@ static void ByteIncrementCheck(unsigned char **buffer, size_t *bit_count, size_t
     }
 }
 
-unsigned char *DeserializeUInt8(unsigned char *buffer,
-                                      size_t *m_bytes,
-                                      size_t *bit_count,
-                                      unsigned_int_size_t uint_size,
-                                      unsigned char is_header,
-                                      UInt8 *out)
+static unsigned char *IncrementUnsignedInteger(unsigned char *buffer,
+                                               size_t *m_bytes,
+                                               size_t *bit_count,
+                                               unsigned char int_bitsize,
+                                               uintptr_t *out)
 {
-    if (out == NULL || !DeserializeArgCheck(buffer, m_bytes, bit_count, uint_size))
+    if (out == NULL || !DeserializeArgCheck(buffer, m_bytes, bit_count, int_bitsize))
     {
         return NULL;
     }
 
-    unsigned char bit_off = 0;
-    *out = 0;
-    while (uint_size > 0 && buffer != NULL)
+    for (unsigned char bit_pos = 0;
+         bit_pos < int_bitsize && buffer != NULL && bit_count != NULL;
+         bit_pos++)
     {
-
         ByteIncrementCheck(&buffer, bit_count, m_bytes);
 
-        if (*m_bytes == 0 || NULL == buffer)
+        if (NULL == buffer || bit_count == NULL || out == NULL)
         {
             return NULL;
         }
 
         if (*buffer & __BIT_MASKS[*bit_count])
         {
-            *out += __BIT_MASKS[bit_off];
+            *out += (1ULL << bit_pos);
         }
-
-        bit_off += 1;
         *bit_count += 1;
-        uint_size--;
     }
-
-    if (is_header)
-    {
-        *out += 1;
-    }
-
     return buffer;
+}
+
+unsigned char *DeserializeUInt8(unsigned char *buffer,
+                                size_t *m_bytes,
+                                size_t *bit_count,
+                                unsigned_int_size_t uint_size,
+                                unsigned char is_header,
+                                UInt8 *out)
+{
+    UInt8 *v = out;
+    if (v == NULL)
+    {
+        return NULL;
+    }
+    *v = is_header ? 1 : 0;
+    return IncrementUnsignedInteger(buffer, m_bytes, bit_count, uint_size, (uintptr_t *)v);
+}
+
+unsigned char *DeserializeUInt16(unsigned char *buffer,
+                                 size_t *m_bytes,
+                                 size_t *bit_count,
+                                 unsigned_int_size_t uint_size,
+                                 UInt16 *out)
+{
+    UInt16 *v = out;
+    if (v == NULL)
+    {
+        return NULL;
+    }
+    *v = 0;
+    return IncrementUnsignedInteger(buffer, m_bytes, bit_count, uint_size, (uintptr_t *)v);
+}
+
+unsigned char *DeserializeUInt32(unsigned char *buffer,
+                                 size_t *m_bytes,
+                                 size_t *bit_count,
+                                 unsigned_int_size_t uint_size,
+                                 UInt32 *out)
+{
+    UInt32 *v = out;
+    if (v == NULL)
+    {
+        return NULL;
+    }
+    *v = 0;
+    return IncrementUnsignedInteger(buffer, m_bytes, bit_count, uint_size, (uintptr_t *)v);
+}
+
+unsigned char *DeserializeUInt64(unsigned char *buffer,
+                                 size_t *m_bytes,
+                                 size_t *bit_count,
+                                 unsigned_int_size_t uint_size,
+                                 UInt64 *out)
+{
+    UInt64 *v = out;
+    if (v == NULL)
+    {
+        return NULL;
+    }
+    *v = 0;
+    return IncrementUnsignedInteger(buffer, m_bytes, bit_count, uint_size, (uintptr_t *)v);
 }
