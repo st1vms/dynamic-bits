@@ -6,6 +6,9 @@
 // Max number of fields x packet
 #define MAX_PACKET_FIELDS 10
 
+// Max number of fields x packet
+#define MAX_THREADS_N     10
+
 #include "dtypes.h"
 
 #ifdef __cplusplus
@@ -34,6 +37,15 @@ extern "C"
     } dpacket_struct_t;
 
     typedef dpacket_struct_t *dpacket_t;
+
+    /**
+     * @brief Initialize Serialization primitives used to synchronize
+     * PacketTable access across multiple threads.
+     * This function must be called BEFORE any other library function.
+     *
+     * @return 1 on success, 0 in case of errors.
+     */
+    unsigned char InitLocks(void);
 
     /**
      * @brief Initialize a packet reference,

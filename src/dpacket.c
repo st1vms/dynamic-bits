@@ -1,8 +1,53 @@
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
+#include <semaphore.h>
 #include "dpacket.h"
 
 static int _PACKET_TABLE[PACKET_TABLE_SIZE][MAX_PACKET_FIELDS];
+
+static struct _table_sem_t{
+
+    pthread_mutex_t _lock;
+    sem_t _register_sem;
+    sem_t _getter_sem;
+    signed int _csem;
+}_table_sem;
+
+unsigned char InitLocks(void){
+    if( 0 == pthread_mutex_init(&(_table_sem._lock),NULL) &&
+        0 == sem_init(&(_table_sem._register_sem), 0, MAX_THREADS_N) &&
+        0 == sem_init(&_table_sem._getter_sem, 0, MAX_THREADS_N))
+    {
+        _table_sem._csem = 0;
+        return 1;
+    }
+    return 0;
+}
+
+static void _register_lock(){
+    sem_wait(&(_table_sem._register_sem));
+    pthread_mutex_lock(&(_table_sem._lock));
+    while(_table_sem._csem > 0){;}
+}
+
+static void _getter_lock(){
+    sem_wait(&(_table_sem._getter_sem));
+    pthread_mutex_lock(&(_table_sem._lock));
+    _table_sem._csem += 1;
+}
+
+static void _register_post(){
+    _table_sem._csem = 0;
+	sem_post(&(_table_sem._getter_sem));
+    pthread_mutex_unlock(&(_table_sem._lock));
+}
+
+static void _getter_post(){
+    _table_sem._csem -= 1;
+    sem_post(&(_table_sem._register_sem));
+    pthread_mutex_unlock(&(_table_sem._lock));
+}
 
 static void TryDeallocateNodeString(serializable_list_node_t *node_p)
 {
@@ -47,24 +92,30 @@ void FreePacket(dpacket_t packet)
 char RegisterPacket(packet_id_t packet_id, int *packet_format, size_t format_size)
 {
 
-    const size_t y = PACKET_TABLE_SIZE, z = MAX_PACKET_FIELDS;
     if (packet_format == NULL || packet_id > PACKET_TABLE_SIZE || format_size > MAX_PACKET_FIELDS)
     {
         return 0;
     }
 
-    memset(_PACKET_TABLE[packet_id], 0, MAX_PACKET_FIELDS);
+    _register_lock();
+    // Critical Section Start
 
-    for (size_t i = 0; i < format_size; packet_format++, i++)
+    memset(_PACKET_TABLE[packet_id], 0, MAX_PACKET_FIELDS);
+    size_t i = 0;
+    for (;packet_format != NULL && i < format_size; packet_format++, i++)
     {
-        if (packet_format == NULL)
-        {
-            memset(_PACKET_TABLE[packet_id], 0, MAX_PACKET_FIELDS);
-            return 0;
-        }
         _PACKET_TABLE[packet_id][i] = *packet_format;
     }
 
+    if (i != format_size)
+    {
+        memset(_PACKET_TABLE[packet_id], 0, MAX_PACKET_FIELDS);
+        return 0;
+    }
+
+    // Critical Section End
+
+    _register_post();
     return 1;
 }
 
@@ -74,6 +125,9 @@ int *GetPacketFormat(packet_id_t packet_id, size_t *out_size)
     {
         return NULL;
     }
+
+    _getter_lock();
+    // Critical Section Start
 
     *out_size = 0;
     for (size_t i = 0; i < MAX_PACKET_FIELDS; i++)
@@ -85,7 +139,15 @@ int *GetPacketFormat(packet_id_t packet_id, size_t *out_size)
         *out_size += 1;
     }
 
-    return *out_size > 0 ? _PACKET_TABLE[packet_id] : NULL;
+    int * r = NULL;
+    if(*out_size > 0){
+        r = _PACKET_TABLE[packet_id];
+    }
+
+    // Critical Section END
+    _getter_post();
+
+    return r != NULL ? r : NULL;
 }
 
 char NewPacket(dpacket_t packet_p, packet_id_t packet_id)
