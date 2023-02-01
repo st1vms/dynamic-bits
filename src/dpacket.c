@@ -26,21 +26,21 @@ static unsigned char IsValidList(serializable_list_t list_p)
 
 void FreePacket(dpacket_t packet)
 {
-    if (packet != NULL && IsValidList(packet->data_deque))
+    if (packet != NULL && IsValidList(packet->data_list))
     {
-        serializable_list_node_t *tmp = packet->data_deque.first_node;
+        serializable_list_node_t *tmp = packet->data_list.first_node;
         while (tmp != NULL)
         {
-            packet->data_deque.first_node = tmp->next_node;
+            packet->data_list.first_node = tmp->next_node;
             if (tmp->stype == UTF8_STRING_STYPE)
             {
                 TryDeallocateNodeString(tmp);
             }
             free(tmp);
-            tmp = packet->data_deque.first_node;
+            tmp = packet->data_list.first_node;
         }
-        packet->data_deque.first_node = NULL;
-        packet->data_deque.size = 0;
+        packet->data_list.first_node = NULL;
+        packet->data_list.size = 0;
     }
 }
 
@@ -94,7 +94,7 @@ char NewPacket(dpacket_t packet_p, packet_id_t packet_id)
     {
         return 0;
     }
-    packet_p->data_deque = (serializable_list_t){
+    packet_p->data_list = (serializable_list_t){
         .size = 0,
         .first_node = NULL};
     packet_p->packet_id = packet_id;
@@ -105,7 +105,7 @@ char NewPacket(dpacket_t packet_p, packet_id_t packet_id)
 char AddSerializable(dpacket_t dpacket_p, serializable_type_t stype, data_union_t datav)
 {
     if (dpacket_p == NULL ||
-        !IsValidList(dpacket_p->data_deque) ||
+        !IsValidList(dpacket_p->data_list) ||
         stype <= NO_TYPE ||
         stype > UTF8_STRING_STYPE)
     {
@@ -123,16 +123,16 @@ char AddSerializable(dpacket_t dpacket_p, serializable_type_t stype, data_union_
     node_p->data = datav;
     node_p->next_node = NULL;
 
-    if (NULL == dpacket_p->data_deque.first_node && dpacket_p->data_deque.size == 0)
+    if (NULL == dpacket_p->data_list.first_node && dpacket_p->data_list.size == 0)
     {
-        dpacket_p->data_deque.first_node = node_p;
-        dpacket_p->data_deque.size += 1;
+        dpacket_p->data_list.first_node = node_p;
+        dpacket_p->data_list.size += 1;
         return 1;
     }
-    else if (dpacket_p->data_deque.size > 0 && dpacket_p->data_deque.first_node != NULL)
+    else if (dpacket_p->data_list.size > 0 && dpacket_p->data_list.first_node != NULL)
     {
-        serializable_list_node_t *tmp = dpacket_p->data_deque.first_node;
-        for (size_t i = 0; i < dpacket_p->data_deque.size - 1; i++)
+        serializable_list_node_t *tmp = dpacket_p->data_list.first_node;
+        for (size_t i = 0; i < dpacket_p->data_list.size - 1; i++)
         {
             tmp = tmp->next_node;
         }
@@ -143,7 +143,7 @@ char AddSerializable(dpacket_t dpacket_p, serializable_type_t stype, data_union_
         }
 
         tmp->next_node = node_p;
-        dpacket_p->data_deque.size += 1;
+        dpacket_p->data_list.size += 1;
         return 1;
     }
 

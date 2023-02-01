@@ -6,6 +6,7 @@ include_directories(include)
 set(SOURCES
     src/dbits.c
     src/dpacket.c
+    src/dserial.c
 )
 
 add_executable(main main.c ${SOURCES})
