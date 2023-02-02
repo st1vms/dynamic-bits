@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include "dsem.h"
 #include "dpacket.h"
 
 static int _PACKET_TABLE[PACKET_TABLE_SIZE][MAX_PACKET_FIELDS];
@@ -47,24 +48,30 @@ void FreePacket(dpacket_t packet)
 char RegisterPacket(packet_id_t packet_id, int *packet_format, size_t format_size)
 {
 
-    const size_t y = PACKET_TABLE_SIZE, z = MAX_PACKET_FIELDS;
     if (packet_format == NULL || packet_id > PACKET_TABLE_SIZE || format_size > MAX_PACKET_FIELDS)
     {
         return 0;
     }
 
-    memset(_PACKET_TABLE[packet_id], 0, MAX_PACKET_FIELDS);
+    _register_wait();
+    // Critical Section Start
 
-    for (size_t i = 0; i < format_size; packet_format++, i++)
+    memset(_PACKET_TABLE[packet_id], 0, MAX_PACKET_FIELDS);
+    size_t i = 0;
+    for (; packet_format != NULL && i < format_size; packet_format++, i++)
     {
-        if (packet_format == NULL)
-        {
-            memset(_PACKET_TABLE[packet_id], 0, MAX_PACKET_FIELDS);
-            return 0;
-        }
         _PACKET_TABLE[packet_id][i] = *packet_format;
     }
 
+    if (i != format_size)
+    {
+        memset(_PACKET_TABLE[packet_id], 0, MAX_PACKET_FIELDS);
+        return 0;
+    }
+
+    // Critical Section End
+
+    _register_post();
     return 1;
 }
 
@@ -74,6 +81,9 @@ int *GetPacketFormat(packet_id_t packet_id, size_t *out_size)
     {
         return NULL;
     }
+
+    _getter_wait();
+    // Critical Section Start
 
     *out_size = 0;
     for (size_t i = 0; i < MAX_PACKET_FIELDS; i++)
@@ -85,7 +95,16 @@ int *GetPacketFormat(packet_id_t packet_id, size_t *out_size)
         *out_size += 1;
     }
 
-    return *out_size > 0 ? _PACKET_TABLE[packet_id] : NULL;
+    int *r = NULL;
+    if (*out_size > 0)
+    {
+        r = _PACKET_TABLE[packet_id];
+    }
+
+    // Critical Section END
+    _getter_post();
+
+    return r != NULL ? r : NULL;
 }
 
 char NewPacket(dpacket_t packet_p, packet_id_t packet_id)

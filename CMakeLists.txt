@@ -6,12 +6,13 @@ include_directories(include)
 set(SOURCES
     src/dbits.c
     src/dpacket.c
+    src/dsem.c
     src/dserial.c
 )
 
-add_executable(main main.c ${SOURCES})
+add_executable(test test.c ${SOURCES})
 
-target_link_libraries(main m)
+target_link_libraries(test m)
 
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_FLAGS_DEBUG  "-g")

@@ -4,7 +4,7 @@
 #define PACKET_TABLE_SIZE 1
 
 // Max number of fields x packet
-#define MAX_PACKET_FIELDS 10
+#define MAX_PACKET_FIELDS 20
 
 #include "dtypes.h"
 
@@ -42,7 +42,7 @@ extern "C"
      * @param packet_id Packet ID
      * @return 1 in case a reference was stored, 0 on errors.
      */
-    char NewPacket(dpacket_t packet_p, packet_id_t packet_id);
+    extern char NewPacket(dpacket_t packet_p, packet_id_t packet_id);
 
     /**
      * @brief Register a packet along with fields and ID,
@@ -53,7 +53,7 @@ extern "C"
      * @param format_size Format array size, must not be greater than MAX_PACKET_FIELDS.
      * @return 1 on success, 0 in case of errors.
      */
-    char RegisterPacket(packet_id_t packet_id, int *packet_format, size_t format_size);
+    extern char RegisterPacket(packet_id_t packet_id, int *packet_format, size_t format_size);
 
     /**
      * @brief Get the packet format array from a packet_id,
@@ -64,7 +64,7 @@ extern "C"
      * @return int array pointer on success.
      * In case of errors, NULL is returned and `out_size` will get the value of 0
      */
-    int *GetPacketFormat(packet_id_t packet_id, size_t *out_size);
+    extern int *GetPacketFormat(packet_id_t packet_id, size_t *out_size);
 
     /**
      * @brief This function will attempt to free the serializable list stored in
@@ -74,7 +74,7 @@ extern "C"
      *
      * @param list_p Packet structure pointer
      */
-    void FreePacket(dpacket_t list_p);
+    extern void FreePacket(dpacket_t list_p);
 
     /**
      * @brief Add a Serializable to the end of the packet serializable list
@@ -84,7 +84,7 @@ extern "C"
      * @param datav Data variable union
      * @return 1  on success, 0 in case of errors
      */
-    char AddSerializable(dpacket_t dpacket_p, serializable_type_t stype, data_union_t datav);
+    extern char AddSerializable(dpacket_t dpacket_p, serializable_type_t stype, data_union_t datav);
 
 #ifdef __cplusplus
 }

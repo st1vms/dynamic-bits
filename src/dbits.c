@@ -1,20 +1,8 @@
-#include <math.h>
 #include <stdlib.h>
+#include <math.h>
 #include "dserial.h"
 #include "dpacket.h"
 #include "dbits.h"
-
-static unsigned char GetUIntBitsize(UInt64 v)
-{
-    if(v == 0){return 1;}
-
-    unsigned char bitsize = 0;
-    while(v != 0){
-        bitsize++;
-        v >>= 1;
-    }
-    return bitsize;
-}
 
 char SerializePacket(unsigned char *buffer, size_t buffer_size, dpacket_t packet, size_t *out_size)
 {
@@ -48,61 +36,127 @@ char SerializePacket(unsigned char *buffer, size_t buffer_size, dpacket_t packet
     {
         switch (node->stype)
         {
-        case UINT8_STYPE:
-            // Serialize UINT8 header
-            if (!(header_bitsize = GetUIntBitsize(node->data.numerical_v.u8_v)))
+        case BOOLEAN_STYPE:
+            if (!SerializeBoolean(node->data.boolean_v, buffer, buffer_size, out_size, &bit_off))
             {
                 *out_size = 0;
                 return 0;
             }
-            // Serialize UINT8
+            break;
+        case UINT8_STYPE:
+            if (!(header_bitsize = GetUIntBitsize(node->data.decimal_v.u8_v)))
+            {
+                *out_size = 0;
+                return 0;
+            }
             if (!SerializeNumericalHeader(header_bitsize, HEADER8_SIZE, buffer, buffer_size, out_size, &bit_off) ||
-                !SerializeUInt(node->data.numerical_v.u8_v, buffer, buffer_size, out_size, &bit_off))
+                !SerializeUInt(node->data.decimal_v.u8_v, buffer, buffer_size, out_size, &bit_off))
             {
                 *out_size = 0;
                 return 0;
             }
             break;
         case UINT16_STYPE:
-            // Serialize UINT8 header
-            if (!(header_bitsize = GetUIntBitsize(node->data.numerical_v.u16_v)))
+            if (!(header_bitsize = GetUIntBitsize(node->data.decimal_v.u16_v)))
             {
                 *out_size = 0;
                 return 0;
             }
-            // Serialize UINT8
             if (!SerializeNumericalHeader(header_bitsize, HEADER16_SIZE, buffer, buffer_size, out_size, &bit_off) ||
-                !SerializeUInt(node->data.numerical_v.u16_v, buffer, buffer_size, out_size, &bit_off))
+                !SerializeUInt(node->data.decimal_v.u16_v, buffer, buffer_size, out_size, &bit_off))
             {
                 *out_size = 0;
                 return 0;
             }
             break;
         case UINT32_STYPE:
-            // Serialize UINT8 header
-            if (!(header_bitsize = GetUIntBitsize(node->data.numerical_v.u32_v)))
+            if (!(header_bitsize = GetUIntBitsize(node->data.decimal_v.u32_v)))
             {
                 *out_size = 0;
                 return 0;
             }
-            // Serialize UINT8
             if (!SerializeNumericalHeader(header_bitsize, HEADER32_SIZE, buffer, buffer_size, out_size, &bit_off) ||
-                !SerializeUInt(node->data.numerical_v.u32_v, buffer, buffer_size, out_size, &bit_off))
+                !SerializeUInt(node->data.decimal_v.u32_v, buffer, buffer_size, out_size, &bit_off))
             {
                 *out_size = 0;
                 return 0;
             }
             break;
         case UINT64_STYPE:
-            // Serialize UINT8 header
-            if (!(header_bitsize = GetUIntBitsize(node->data.numerical_v.u64_v)))
+            if (!(header_bitsize = GetUIntBitsize(node->data.decimal_v.u64_v)))
             {
                 *out_size = 0;
                 return 0;
             }
-            // Serialize UINT8
             if (!SerializeNumericalHeader(header_bitsize, HEADER64_SIZE, buffer, buffer_size, out_size, &bit_off) ||
-                !SerializeUInt(node->data.numerical_v.u64_v, buffer, buffer_size, out_size, &bit_off))
+                !SerializeUInt(node->data.decimal_v.u64_v, buffer, buffer_size, out_size, &bit_off))
+            {
+                *out_size = 0;
+                return 0;
+            }
+            break;
+        case INT8_STYPE:
+            if (!(header_bitsize = GetIntBitsize(node->data.decimal_v.i8_v)))
+            {
+                *out_size = 0;
+                return 0;
+            }
+            if (!SerializeNumericalHeader(header_bitsize, HEADER8_SIZE, buffer, buffer_size, out_size, &bit_off) ||
+                !SerializeInt(node->data.decimal_v.i8_v, buffer, buffer_size, out_size, &bit_off))
+            {
+                *out_size = 0;
+                return 0;
+            }
+            break;
+        case INT16_STYPE:
+            if (!(header_bitsize = GetIntBitsize(node->data.decimal_v.i16_v)))
+            {
+                *out_size = 0;
+                return 0;
+            }
+            if (!SerializeNumericalHeader(header_bitsize, HEADER16_SIZE, buffer, buffer_size, out_size, &bit_off) ||
+                !SerializeInt(node->data.decimal_v.i16_v, buffer, buffer_size, out_size, &bit_off))
+            {
+                *out_size = 0;
+                return 0;
+            }
+            break;
+        case INT32_STYPE:
+            if (!(header_bitsize = GetIntBitsize(node->data.decimal_v.i32_v)))
+            {
+                *out_size = 0;
+                return 0;
+            }
+            if (!SerializeNumericalHeader(header_bitsize, HEADER32_SIZE, buffer, buffer_size, out_size, &bit_off) ||
+                !SerializeInt(node->data.decimal_v.i32_v, buffer, buffer_size, out_size, &bit_off))
+            {
+                *out_size = 0;
+                return 0;
+            }
+            break;
+        case INT64_STYPE:
+            if (!(header_bitsize = GetIntBitsize(node->data.decimal_v.i64_v)))
+            {
+                *out_size = 0;
+                return 0;
+            }
+            if (!SerializeNumericalHeader(header_bitsize, HEADER64_SIZE, buffer, buffer_size, out_size, &bit_off) ||
+                !SerializeInt(node->data.decimal_v.i64_v, buffer, buffer_size, out_size, &bit_off))
+            {
+                *out_size = 0;
+                return 0;
+            }
+            break;
+        case DOUBLE_STYPE:
+
+            if (!(header_bitsize = GetDoubleMantissaBitsize(node->data.double_v)))
+            {
+                *out_size = 0;
+                return 0;
+            }
+
+            if (!SerializeNumericalHeader(header_bitsize, HEADER64_SIZE, buffer, buffer_size, out_size, &bit_off) ||
+                !SerializeDouble(node->data.double_v, buffer, buffer_size, out_size, &bit_off))
             {
                 *out_size = 0;
                 return 0;
@@ -117,7 +171,6 @@ char SerializePacket(unsigned char *buffer, size_t buffer_size, dpacket_t packet
     *out_size += 1;
     return 1;
 }
-
 
 char DeserializeBuffer(unsigned char *buffer, const size_t buffer_size, dpacket_t packet_out)
 {
@@ -165,11 +218,22 @@ char DeserializeBuffer(unsigned char *buffer, const size_t buffer_size, dpacket_
 
         switch (*packet_format)
         {
+        case BOOLEAN_STYPE:
+
+            data.boolean_v = 0;
+            if (NULL == (buffer = DeserializeBoolean(buffer, &n, &bit_count, &(data.boolean_v))) ||
+                !AddSerializable(packet_out, BOOLEAN_STYPE, data))
+            {
+                FreePacket(packet_out);
+                return 0;
+            }
+
+            break;
         case UINT8_STYPE:
 
-            data.numerical_v.u8_v = 0;
+            data.decimal_v.u8_v = 0;
             if (NULL == (buffer = DeserializeUInt8(buffer, &n, &bit_count, HEADER8_SIZE, 1, &header_size)) ||
-                NULL == (buffer = DeserializeUInt8(buffer, &n, &bit_count, header_size, 0, &(data.numerical_v.u8_v))) ||
+                NULL == (buffer = DeserializeUInt8(buffer, &n, &bit_count, header_size, 0, &(data.decimal_v.u8_v))) ||
                 !AddSerializable(packet_out, UINT8_STYPE, data))
             {
                 FreePacket(packet_out);
@@ -179,9 +243,9 @@ char DeserializeBuffer(unsigned char *buffer, const size_t buffer_size, dpacket_
             break;
         case UINT16_STYPE:
 
-            data.numerical_v.u16_v = 0;
+            data.decimal_v.u16_v = 0;
             if (NULL == (buffer = DeserializeUInt8(buffer, &n, &bit_count, HEADER16_SIZE, 1, &header_size)) ||
-                NULL == (buffer = DeserializeUInt16(buffer, &n, &bit_count, header_size, &(data.numerical_v.u16_v))) ||
+                NULL == (buffer = DeserializeUInt16(buffer, &n, &bit_count, header_size, &(data.decimal_v.u16_v))) ||
                 !AddSerializable(packet_out, UINT16_STYPE, data))
             {
                 FreePacket(packet_out);
@@ -191,9 +255,9 @@ char DeserializeBuffer(unsigned char *buffer, const size_t buffer_size, dpacket_
             break;
         case UINT32_STYPE:
 
-            data.numerical_v.u32_v = 0;
+            data.decimal_v.u32_v = 0;
             if (NULL == (buffer = DeserializeUInt8(buffer, &n, &bit_count, HEADER32_SIZE, 1, &header_size)) ||
-                NULL == (buffer = DeserializeUInt32(buffer, &n, &bit_count, header_size, &(data.numerical_v.u32_v))) ||
+                NULL == (buffer = DeserializeUInt32(buffer, &n, &bit_count, header_size, &(data.decimal_v.u32_v))) ||
                 !AddSerializable(packet_out, UINT32_STYPE, data))
             {
                 FreePacket(packet_out);
@@ -203,10 +267,69 @@ char DeserializeBuffer(unsigned char *buffer, const size_t buffer_size, dpacket_
             break;
         case UINT64_STYPE:
 
-            data.numerical_v.u64_v = 0;
+            data.decimal_v.u64_v = 0;
             if (NULL == (buffer = DeserializeUInt8(buffer, &n, &bit_count, HEADER64_SIZE, 1, &header_size)) ||
-                NULL == (buffer = DeserializeUInt64(buffer, &n, &bit_count, header_size, &(data.numerical_v.u64_v))) ||
+                NULL == (buffer = DeserializeUInt64(buffer, &n, &bit_count, header_size, &(data.decimal_v.u64_v))) ||
                 !AddSerializable(packet_out, UINT64_STYPE, data))
+            {
+                FreePacket(packet_out);
+                return 0;
+            }
+
+            break;
+        case INT8_STYPE:
+
+            data.decimal_v.i8_v = 0;
+            if (NULL == (buffer = DeserializeUInt8(buffer, &n, &bit_count, HEADER8_SIZE, 1, &header_size)) ||
+                NULL == (buffer = DeserializeInt8(buffer, &n, &bit_count, header_size, &(data.decimal_v.i8_v))) ||
+                !AddSerializable(packet_out, INT8_STYPE, data))
+            {
+                FreePacket(packet_out);
+                return 0;
+            }
+
+            break;
+        case INT16_STYPE:
+
+            data.decimal_v.i16_v = 0;
+            if (NULL == (buffer = DeserializeUInt8(buffer, &n, &bit_count, HEADER16_SIZE, 1, &header_size)) ||
+                NULL == (buffer = DeserializeInt16(buffer, &n, &bit_count, header_size, &(data.decimal_v.i16_v))) ||
+                !AddSerializable(packet_out, INT16_STYPE, data))
+            {
+                FreePacket(packet_out);
+                return 0;
+            }
+
+            break;
+        case INT32_STYPE:
+
+            data.decimal_v.i32_v = 0;
+            if (NULL == (buffer = DeserializeUInt8(buffer, &n, &bit_count, HEADER32_SIZE, 1, &header_size)) ||
+                NULL == (buffer = DeserializeInt32(buffer, &n, &bit_count, header_size, &(data.decimal_v.i32_v))) ||
+                !AddSerializable(packet_out, INT32_STYPE, data))
+            {
+                FreePacket(packet_out);
+                return 0;
+            }
+
+            break;
+        case INT64_STYPE:
+
+            data.decimal_v.i64_v = 0;
+            if (NULL == (buffer = DeserializeUInt8(buffer, &n, &bit_count, HEADER64_SIZE, 1, &header_size)) ||
+                NULL == (buffer = DeserializeInt64(buffer, &n, &bit_count, header_size, &(data.decimal_v.i64_v))) ||
+                !AddSerializable(packet_out, INT64_STYPE, data))
+            {
+                FreePacket(packet_out);
+                return 0;
+            }
+
+            break;
+        case DOUBLE_STYPE:
+
+            data.double_v = 0.0;
+            if (NULL == (buffer = DeserializeDouble(buffer, &n, &bit_count, &(data.double_v))) ||
+                !AddSerializable(packet_out, DOUBLE_STYPE, data))
             {
                 FreePacket(packet_out);
                 return 0;
