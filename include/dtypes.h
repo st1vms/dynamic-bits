@@ -56,7 +56,7 @@ extern "C"
         char *utf8_string;
     } utf8_string_t;
 
-    typedef union numerical_t
+    typedef union decimal_union_t
     {
         UInt8 u8_v;
         UInt16 u16_v;
@@ -66,16 +66,17 @@ extern "C"
         Int16 i16_v;
         Int32 i32_v;
         Int64 i64_v;
-        Double double_v;
-    } numerical_t;
+    } decimal_union_t;
 
     typedef union data_union_t
     {
-        numerical_t numerical_v;
+        Double double_v;
 
         Boolean boolean_v;
 
         utf8_string_t utf8_str_v;
+
+        decimal_union_t decimal_v;
 
     } data_union_t;
 

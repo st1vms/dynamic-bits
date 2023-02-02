@@ -7,6 +7,12 @@ extern "C"
 {
 #endif
 
+    unsigned char GetIntBitsize(Int64 v);
+
+    unsigned char GetUIntBitsize(UInt64 v);
+
+    unsigned char GetDoubleMantissaBitsize(Double d);
+
     char SerializeNumericalHeader(UInt8 header_value,
                                   data_header_size_t header_size,
                                   unsigned char *buffer_p,
@@ -25,6 +31,12 @@ extern "C"
                       size_t buffer_size,
                       size_t *size_off,
                       unsigned char *bit_off);
+
+    char SerializeDouble(Double dval,
+                         unsigned char *buffer_p,
+                         size_t buffer_size,
+                         size_t *size_off,
+                         unsigned char *bit_off);
 
     char SerializeBoolean(Boolean boolv,
                           unsigned char *buffer_p,
@@ -85,6 +97,12 @@ extern "C"
                                     size_t *bit_count,
                                     unsigned_int_size_t int_size,
                                     Int64 *out);
+
+    unsigned char *DeserializeDouble(unsigned char *buffer,
+                                     size_t *m_bytes,
+                                     size_t *bit_count,
+                                     Double *out);
+
 #ifdef __cplusplus
 }
 #endif

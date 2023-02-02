@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <math.h>
 #include "dtypes.h"
 
 static const unsigned char __BIT_MASKS[8] = {
@@ -11,6 +12,78 @@ static const unsigned char __BIT_MASKS[8] = {
     (0x40),
     (0x80),
 };
+
+unsigned char GetIntBitsize(Int64 v)
+{
+    if (v == 0)
+    {
+        return 1;
+    }
+
+    UInt64 u = 0;
+    if (v < 0)
+    {
+        u = (UInt64)llabs(v);
+    }
+    else
+    {
+        u = (UInt64)v;
+    }
+
+    unsigned char bitsize = 0;
+    while (u != 0)
+    {
+        bitsize++;
+        u >>= 1;
+    }
+    return bitsize;
+}
+
+unsigned char GetUIntBitsize(UInt64 v)
+{
+    if (v == 0)
+    {
+        return 1;
+    }
+
+    unsigned char bitsize = 0;
+    while (v != 0)
+    {
+        bitsize++;
+        v >>= 1;
+    }
+    return bitsize;
+}
+
+unsigned char GetDoubleMantissaBitsize(Double d)
+{
+    unsigned char bitsize = 0;
+
+    Int32 exponent = 0;
+    Double m = frexp(d, &exponent);
+
+    if (m < 0)
+    {
+        m = fabs(m);
+    }
+
+    if (m == 0.0)
+    {
+        return 1;
+    }
+
+    while (m != 0.0)
+    {
+        m *= 2;
+        if (m >= 1)
+        {
+            m--;
+        }
+        bitsize++;
+    }
+
+    return bitsize;
+}
 
 static void SizeIncrementCheck(size_t *size_off, size_t buffer_size, unsigned char *bit_off)
 {
@@ -147,6 +220,66 @@ char SerializeInt(Int64 ival,
 
         uval >>= 1;
         *bit_off += 1;
+    }
+
+    return 1;
+}
+
+char SerializeDouble(Double dval,
+                     unsigned char *buffer_p,
+                     size_t buffer_size,
+                     size_t *size_off,
+                     unsigned char *bit_off)
+{
+    if (NULL == buffer_p || buffer_size == 0 ||
+        NULL == size_off || NULL == bit_off || *bit_off > 8)
+    {
+        return 0;
+    }
+
+    SizeIncrementCheck(size_off, buffer_size, bit_off);
+
+    Int32 exponent = 0;
+    Double m = frexp(dval, &exponent);
+
+    // Serialize Mantissa
+    if (m < 0)
+    {
+        m = fabs(m);
+        // Set sign bit
+        SetBufferBit_Serialize(&buffer_p, size_off, bit_off);
+    }
+
+    *bit_off += 1;
+
+    SizeIncrementCheck(size_off, buffer_size, bit_off);
+
+    if (m == 0.0)
+    {
+        *bit_off += 1;
+    }
+    else
+    {
+        while (m != 0.0)
+        {
+            SizeIncrementCheck(size_off, buffer_size, bit_off);
+            m *= 2;
+            if (m >= 1)
+            {
+                SetBufferBit_Serialize(&buffer_p, size_off, bit_off);
+                m -= 1;
+            }
+            *bit_off += 1;
+        }
+    }
+
+    // Serialize Exponent
+    unsigned char exp_header_bitsize = GetIntBitsize(exponent);
+    if (!exp_header_bitsize ||
+        !SerializeNumericalHeader(exp_header_bitsize, HEADER16_SIZE, buffer_p, buffer_size, size_off, bit_off) ||
+        !SerializeInt(exponent, buffer_p, buffer_size, size_off, bit_off))
+    {
+        return 0;
     }
 
     return 1;
@@ -415,4 +548,63 @@ unsigned char *DeserializeInt64(unsigned char *buffer,
     }
     *v = 0;
     return IncrementSignedInteger(buffer, m_bytes, bit_count, int_size, (intptr_t *)v);
+}
+
+unsigned char *DeserializeDouble(unsigned char *buffer,
+                                 size_t *m_bytes,
+                                 size_t *bit_count,
+                                 Double *out)
+{
+    if (out == NULL || !DeserializeArgCheck(buffer, m_bytes, bit_count, 1))
+    {
+        return NULL;
+    }
+
+    ByteIncrementCheck(&buffer, bit_count, m_bytes);
+
+    UInt8 header_size = 0;
+    if (NULL == (buffer = DeserializeUInt8(buffer, m_bytes, bit_count, HEADER64_SIZE, 1, &header_size)))
+    {
+        return NULL;
+    }
+
+    ByteIncrementCheck(&buffer, bit_count, m_bytes);
+
+    // 0 POSITIVE | 1 NEGATIVE
+    const unsigned char sign = (*buffer & __BIT_MASKS[*bit_count]) ? 1 : 0;
+    *bit_count += 1;
+
+    Double v = 0.0, m = 0.0;
+    for (unsigned char pos = 0;
+         buffer != NULL && bit_count != NULL && m_bytes != NULL && pos < header_size;
+         pos++)
+    {
+        ByteIncrementCheck(&buffer, bit_count, m_bytes);
+        if (*buffer & __BIT_MASKS[*bit_count])
+        {
+            m += ldexp(1, -(pos + 1));
+        }
+        *bit_count += 1;
+    }
+    v = m; // double precision change on Exp deser. fix
+
+    Int16 exponent = 0;
+    if (NULL == (buffer = DeserializeUInt8(buffer, m_bytes, bit_count, HEADER16_SIZE, 1, &header_size)) ||
+        NULL == (buffer = DeserializeInt16(buffer, m_bytes, bit_count, header_size, &exponent)))
+    {
+        return NULL;
+    }
+    // NOTE
+    // m (mantissa) changes value here, v doesn't ...
+
+    if (sign)
+    {
+        *out = -(ldexp(v, exponent));
+    }
+    else
+    {
+        *out = ldexp(v, exponent);
+    }
+
+    return buffer;
 }
