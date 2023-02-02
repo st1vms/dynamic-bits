@@ -1,53 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
-#include <pthread.h>
-#include <semaphore.h>
+#include "dsem.h"
 #include "dpacket.h"
 
 static int _PACKET_TABLE[PACKET_TABLE_SIZE][MAX_PACKET_FIELDS];
-
-static struct _table_sem_t{
-
-    pthread_mutex_t _lock;
-    sem_t _register_sem;
-    sem_t _getter_sem;
-    signed int _csem;
-}_table_sem;
-
-unsigned char InitLocks(void){
-    if( 0 == pthread_mutex_init(&(_table_sem._lock),NULL) &&
-        0 == sem_init(&(_table_sem._register_sem), 0, MAX_THREADS_N) &&
-        0 == sem_init(&_table_sem._getter_sem, 0, MAX_THREADS_N))
-    {
-        _table_sem._csem = 0;
-        return 1;
-    }
-    return 0;
-}
-
-static void _register_lock(){
-    sem_wait(&(_table_sem._register_sem));
-    pthread_mutex_lock(&(_table_sem._lock));
-    while(_table_sem._csem > 0){;}
-}
-
-static void _getter_lock(){
-    sem_wait(&(_table_sem._getter_sem));
-    pthread_mutex_lock(&(_table_sem._lock));
-    _table_sem._csem += 1;
-}
-
-static void _register_post(){
-    _table_sem._csem = 0;
-	sem_post(&(_table_sem._getter_sem));
-    pthread_mutex_unlock(&(_table_sem._lock));
-}
-
-static void _getter_post(){
-    _table_sem._csem -= 1;
-    sem_post(&(_table_sem._register_sem));
-    pthread_mutex_unlock(&(_table_sem._lock));
-}
 
 static void TryDeallocateNodeString(serializable_list_node_t *node_p)
 {
@@ -97,12 +53,12 @@ char RegisterPacket(packet_id_t packet_id, int *packet_format, size_t format_siz
         return 0;
     }
 
-    _register_lock();
+    _register_wait();
     // Critical Section Start
 
     memset(_PACKET_TABLE[packet_id], 0, MAX_PACKET_FIELDS);
     size_t i = 0;
-    for (;packet_format != NULL && i < format_size; packet_format++, i++)
+    for (; packet_format != NULL && i < format_size; packet_format++, i++)
     {
         _PACKET_TABLE[packet_id][i] = *packet_format;
     }
@@ -126,7 +82,7 @@ int *GetPacketFormat(packet_id_t packet_id, size_t *out_size)
         return NULL;
     }
 
-    _getter_lock();
+    _getter_wait();
     // Critical Section Start
 
     *out_size = 0;
@@ -139,8 +95,9 @@ int *GetPacketFormat(packet_id_t packet_id, size_t *out_size)
         *out_size += 1;
     }
 
-    int * r = NULL;
-    if(*out_size > 0){
+    int *r = NULL;
+    if (*out_size > 0)
+    {
         r = _PACKET_TABLE[packet_id];
     }
 

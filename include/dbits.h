@@ -1,6 +1,7 @@
 #ifndef __DBITS_H
 
 #include "dtypes.h"
+#include "dsem.h"
 #include "dpacket.h"
 
 #ifdef __cplusplus

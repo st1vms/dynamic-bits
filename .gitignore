@@ -9,11 +9,6 @@
 *.out
 build/
 
-# Test files
-test
-test.*
-main.c
-
 # Debug
 *debug*
 

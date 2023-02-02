@@ -36,17 +36,17 @@ extern "C"
         HEADER64_SIZE = 0x6
     } data_header_size_t;
 
-    typedef uint8_t Boolean;
+    typedef unsigned char Boolean;
 
-    typedef int8_t Int8;
-    typedef int16_t Int16;
-    typedef int32_t Int32;
-    typedef int64_t Int64;
+    typedef signed char Int8;
+    typedef signed short Int16;
+    typedef signed int Int32;
+    typedef signed long long Int64;
 
-    typedef uint8_t UInt8;
-    typedef uint16_t UInt16;
-    typedef uint32_t UInt32;
-    typedef uint64_t UInt64;
+    typedef unsigned char UInt8;
+    typedef unsigned short UInt16;
+    typedef unsigned int UInt32;
+    typedef unsigned long long UInt64;
 
     typedef double Double;
 
