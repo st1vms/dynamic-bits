@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include "dserial.h"
 #include "dpacket.h"
@@ -157,6 +158,14 @@ char SerializePacket(unsigned char *buffer, size_t buffer_size, dpacket_t packet
 
             if (!SerializeNumericalHeader(header_bitsize, HEADER64_SIZE, buffer, buffer_size, out_size, &bit_off) ||
                 !SerializeDouble(node->data.double_v, buffer, buffer_size, out_size, &bit_off))
+            {
+                *out_size = 0;
+                return 0;
+            }
+            break;
+        case UTF8_STRING_STYPE:
+
+            if (!SerializeUTF8String(node->data.utf8_str_v, buffer, buffer_size, out_size, &bit_off))
             {
                 *out_size = 0;
                 return 0;
@@ -335,6 +344,20 @@ char DeserializeBuffer(unsigned char *buffer, const size_t buffer_size, dpacket_
                 return 0;
             }
 
+            break;
+        case UTF8_STRING_STYPE:
+
+            data.utf8_str_v = (utf8_string_t){
+                .length = 0,
+                .utf8_string = {0}};
+            memset(data.utf8_str_v.utf8_string, 0, MAX_STRING_LENGTH);
+
+            if (NULL == (buffer = DeserializeUTF8String(buffer, &n, &bit_count, &(data.utf8_str_v))) ||
+                !AddSerializable(packet_out, UTF8_STRING_STYPE, data))
+            {
+                FreePacket(packet_out);
+                return 0;
+            }
             break;
         default:
             FreePacket(packet_out);

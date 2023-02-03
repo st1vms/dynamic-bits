@@ -5,18 +5,6 @@
 
 static int _PACKET_TABLE[PACKET_TABLE_SIZE][MAX_PACKET_FIELDS];
 
-static void TryDeallocateNodeString(serializable_list_node_t *node_p)
-{
-    if (node_p != NULL)
-    {
-        if (node_p->data.utf8_str_v.utf8_string != NULL)
-        {
-            free(node_p->data.utf8_str_v.utf8_string);
-        }
-        node_p->data.utf8_str_v.length = 0;
-    }
-}
-
 static unsigned char IsValidList(serializable_list_t list_p)
 {
     return ((list_p.size > 0 && NULL == list_p.first_node) ||
@@ -33,10 +21,6 @@ void FreePacket(dpacket_t packet)
         while (tmp != NULL)
         {
             packet->data_list.first_node = tmp->next_node;
-            if (tmp->stype == UTF8_STRING_STYPE)
-            {
-                TryDeallocateNodeString(tmp);
-            }
             free(tmp);
             tmp = packet->data_list.first_node;
         }

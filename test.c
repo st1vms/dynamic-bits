@@ -3,7 +3,7 @@
 #include <float.h>
 #include "dbits.h"
 
-#define SIZE_TEST 19
+#define SIZE_TEST 20
 
 static int packet_format[SIZE_TEST] = {
     BOOLEAN_STYPE,
@@ -25,7 +25,7 @@ static int packet_format[SIZE_TEST] = {
     INT32_STYPE,
     INT64_STYPE,
     INT64_STYPE,
-};
+    UTF8_STRING_STYPE};
 
 int main()
 {
@@ -116,7 +116,7 @@ int main()
         FreePacket(&packet);
         return -1;
     }
-        if (!AddSerializable(&packet, INT32_STYPE, (data_union_t){.decimal_v.i32_v = INT32_MAX}))
+    if (!AddSerializable(&packet, INT32_STYPE, (data_union_t){.decimal_v.i32_v = INT32_MAX}))
     {
         FreePacket(&packet);
         return -1;
@@ -136,7 +136,11 @@ int main()
         FreePacket(&packet);
         return -1;
     }
-
+    if (!AddSerializable(&packet, UTF8_STRING_STYPE, (data_union_t){.utf8_str_v.utf8_string = "I do desire we may be better strangers", .utf8_str_v.length = strlen("I do desire we may be better strangers")}))
+    {
+        FreePacket(&packet);
+        return -1;
+    }
 
     size_t buffer_size = 0;
     unsigned char buffer[SIZE_TEST * 100] = {0};
@@ -198,6 +202,9 @@ int main()
                     break;
                 case DOUBLE_STYPE:
                     printf("\nD = %lf\n", tmp->data.double_v);
+                    break;
+                case UTF8_STRING_STYPE:
+                    printf("\nUTF8 (length = %lu) = %s\n", tmp->data.utf8_str_v.length, tmp->data.utf8_str_v.utf8_string);
                     break;
                 default:
                     break;

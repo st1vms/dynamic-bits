@@ -4,6 +4,8 @@
 #include <ctype.h>
 #include <stdint.h>
 
+#define MAX_STRING_LENGTH   (0xff)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -53,7 +55,7 @@ extern "C"
     typedef struct utf8_string_t
     {
         size_t length;
-        char *utf8_string;
+        UInt8 utf8_string[MAX_STRING_LENGTH];
     } utf8_string_t;
 
     typedef union decimal_union_t
