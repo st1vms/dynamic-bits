@@ -38,6 +38,12 @@ extern "C"
                          size_t *size_off,
                          unsigned char *bit_off);
 
+    char SerializeUTF8String(utf8_string_t dval,
+                             unsigned char *buffer_p,
+                             size_t buffer_size,
+                             size_t *size_off,
+                             unsigned char *bit_off);
+
     char SerializeBoolean(Boolean boolv,
                           unsigned char *buffer_p,
                           size_t buffer_size,
@@ -102,6 +108,11 @@ extern "C"
                                      size_t *m_bytes,
                                      size_t *bit_count,
                                      Double *out);
+
+    unsigned char *DeserializeUTF8String(unsigned char *buffer,
+                                         size_t *m_bytes,
+                                         size_t *bit_count,
+                                         utf8_string_t *out);
 
 #ifdef __cplusplus
 }

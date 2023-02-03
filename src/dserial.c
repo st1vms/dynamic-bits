@@ -285,6 +285,78 @@ char SerializeDouble(Double dval,
     return 1;
 }
 
+char SerializeUTF8String(utf8_string_t dval,
+                         unsigned char *buffer_p,
+                         size_t buffer_size,
+                         size_t *size_off,
+                         unsigned char *bit_off)
+{
+    if (NULL == buffer_p || buffer_size == 0 ||
+        NULL == size_off || NULL == bit_off || *bit_off > 8 ||
+        dval.length >= MAX_STRING_LENGTH || dval.utf8_string == NULL)
+    {
+        return 0;
+    }
+
+    SizeIncrementCheck(size_off, buffer_size, bit_off);
+
+    UInt8 header_size = 0;
+    // Serialize appropriate string length header
+    if (MAX_STRING_LENGTH <= UINT8_MAX)
+    {
+        header_size = GetUIntBitsize(dval.length);
+        if (header_size == 0 ||
+            !SerializeNumericalHeader(header_size, HEADER8_SIZE, buffer_p, buffer_size, size_off, bit_off))
+        {
+            return 0;
+        }
+    }
+    else if (MAX_STRING_LENGTH <= UINT16_MAX)
+    {
+        header_size = GetUIntBitsize(dval.length);
+        if (header_size == 0 ||
+            !SerializeNumericalHeader(header_size, HEADER16_SIZE, buffer_p, buffer_size, size_off, bit_off))
+        {
+            return 0;
+        }
+    }
+    else
+    {
+        return 0;
+    }
+
+    // Serialize string length
+    if (!SerializeUInt(dval.length, buffer_p, buffer_size, size_off, bit_off))
+    {
+        return 0;
+    }
+
+    // Serialize string bytes
+    UInt8 *v = dval.utf8_string;
+    for (size_t i = 0; v != NULL && i < dval.length; v++, i++)
+    {
+
+        for (size_t b = 0; b < UINT8_SIZE; b++)
+        {
+
+            SizeIncrementCheck(size_off, buffer_size, bit_off);
+
+            if (*v != 0)
+            {
+                if (*v & 1)
+                {
+                    SetBufferBit_Serialize(&buffer_p, size_off, bit_off);
+                }
+                *v >>= 1;
+            }
+
+            *bit_off += 1;
+        }
+    }
+
+    return 1;
+}
+
 char SerializeBoolean(Boolean boolv,
                       unsigned char *buffer_p,
                       size_t buffer_size,
@@ -604,6 +676,79 @@ unsigned char *DeserializeDouble(unsigned char *buffer,
     else
     {
         *out = ldexp(v, exponent);
+    }
+
+    return buffer;
+}
+
+unsigned char *DeserializeUTF8String(unsigned char *buffer,
+                                     size_t *m_bytes,
+                                     size_t *bit_count,
+                                     utf8_string_t *out)
+{
+    if (out == NULL || !DeserializeArgCheck(buffer, m_bytes, bit_count, 1))
+    {
+        return NULL;
+    }
+
+    ByteIncrementCheck(&buffer, bit_count, m_bytes);
+
+    // Deserialize appropriate string length
+    UInt16 header_value_16 = 0;
+    UInt8 header_value_8 = 0;
+
+    if (MAX_STRING_LENGTH <= UINT8_MAX)
+    {
+        if (!(buffer = DeserializeUInt8(buffer, m_bytes, bit_count, HEADER8_SIZE, 1, &header_value_8)) ||
+            !(buffer = DeserializeUInt8(buffer, m_bytes, bit_count, header_value_8, 0, &header_value_8)))
+        {
+            return NULL;
+        }
+        out->length = header_value_8;
+    }
+    else if (MAX_STRING_LENGTH <= UINT16_MAX)
+    {
+        if (!(buffer = DeserializeUInt8(buffer, m_bytes, bit_count, HEADER16_SIZE, 1, &header_value_8)) ||
+            !(buffer = DeserializeUInt16(buffer, m_bytes, bit_count, header_value_8, &header_value_16)))
+        {
+            return NULL;
+        }
+        out->length = header_value_8;
+    }
+    else
+    {
+        return NULL;
+    }
+
+    if (out->length >= MAX_STRING_LENGTH)
+    {
+        return NULL;
+    }
+
+    // Deserialize string bytes
+    UInt8 v = 0;
+    for (size_t i = 0; i < out->length; i++)
+    {
+
+        for (size_t b = 0; b < UINT8_SIZE; b++)
+        {
+            if (NULL == buffer || bit_count == NULL || out == NULL)
+            {
+                return NULL;
+            }
+
+            ByteIncrementCheck(&buffer, bit_count, m_bytes);
+
+            if (*buffer & __BIT_MASKS[*bit_count])
+            {
+                v += (1U << b);
+            }
+
+            *bit_count += 1;
+        }
+
+        out->utf8_string[i] = v;
+        v = 0;
     }
 
     return buffer;
