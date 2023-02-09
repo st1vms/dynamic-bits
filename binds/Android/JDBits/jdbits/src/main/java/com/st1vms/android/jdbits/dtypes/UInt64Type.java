@@ -12,7 +12,7 @@ public class UInt64Type extends DSerializable {
 
     @Override
     public void setLongValue(long l) {
-        if(this.l < 0 || l > (1L << 63)){
+        if(l < 0){
             this.l = 0;
             return;
         }

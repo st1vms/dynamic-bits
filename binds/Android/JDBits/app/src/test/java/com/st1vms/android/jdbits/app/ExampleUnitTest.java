@@ -1,4 +1,4 @@
-package com.st1vms.android.jdbits;
+package com.st1vms.android.jdbits.app;
 
 import org.junit.Test;
 

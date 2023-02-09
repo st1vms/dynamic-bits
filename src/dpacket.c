@@ -3,7 +3,7 @@
 #include "dsem.h"
 #include "dpacket.h"
 
-static int _PACKET_TABLE[PACKET_TABLE_SIZE][MAX_PACKET_FIELDS];
+static int PACKET_TABLE[PACKET_TABLE_SIZE][MAX_PACKET_FIELDS];
 
 static unsigned char IsValidList(serializable_list_t list_p)
 {
@@ -40,16 +40,16 @@ char RegisterPacket(packet_id_t packet_id, int *packet_format, size_t format_siz
     _register_wait();
     // Critical Section Start
 
-    memset(_PACKET_TABLE[packet_id], 0, MAX_PACKET_FIELDS);
+    memset(PACKET_TABLE[packet_id], 0, MAX_PACKET_FIELDS);
     size_t i = 0;
     for (; packet_format != NULL && i < format_size; packet_format++, i++)
     {
-        _PACKET_TABLE[packet_id][i] = *packet_format;
+        PACKET_TABLE[packet_id][i] = *packet_format;
     }
 
     if (i != format_size)
     {
-        memset(_PACKET_TABLE[packet_id], 0, MAX_PACKET_FIELDS);
+        memset(PACKET_TABLE[packet_id], 0, MAX_PACKET_FIELDS);
         return 0;
     }
 
@@ -72,7 +72,7 @@ int *GetPacketFormat(packet_id_t packet_id, size_t *out_size)
     *out_size = 0;
     for (size_t i = 0; i < MAX_PACKET_FIELDS; i++)
     {
-        if (_PACKET_TABLE[packet_id][i] == 0)
+        if (PACKET_TABLE[packet_id][i] == 0)
         {
             break;
         }
@@ -82,7 +82,7 @@ int *GetPacketFormat(packet_id_t packet_id, size_t *out_size)
     int *r = NULL;
     if (*out_size > 0)
     {
-        r = _PACKET_TABLE[packet_id];
+        r = PACKET_TABLE[packet_id];
     }
 
     // Critical Section END

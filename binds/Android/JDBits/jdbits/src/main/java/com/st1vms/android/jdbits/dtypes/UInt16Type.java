@@ -12,7 +12,7 @@ public class UInt16Type extends DSerializable {
 
     @Override
     public void setIntValue(int i) {
-        if(this.i < 0 || i > (1<<16)){
+        if(i < 0 || i > (1<<16)){
             this.i = 0;
             return;
         }

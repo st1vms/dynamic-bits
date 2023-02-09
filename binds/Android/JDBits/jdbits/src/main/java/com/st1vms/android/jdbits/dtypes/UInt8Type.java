@@ -12,7 +12,7 @@ public class UInt8Type extends DSerializable {
 
     @Override
     public void setShortValue(short s) {
-        if(this.s < 0 || s > (1<<8)){
+        if(s < 0 || s > (1<<8)){
             this.s = 0;
             return;
         }

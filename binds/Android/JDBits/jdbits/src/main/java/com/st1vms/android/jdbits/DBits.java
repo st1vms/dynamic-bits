@@ -1,5 +1,6 @@
 package com.st1vms.android.jdbits;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public class DBits {
@@ -16,7 +17,7 @@ public class DBits {
 
     public static native boolean RegisterPacket(int packet_id, final DTypes[] fieldTypeArray);
 
-    public static native @Nullable byte[] SerializeDPacket(DPacket packet);
+    public static native @Nullable byte[] SerializeDPacket(@NonNull DPacket packet);
 
-    public static native DPacket DeserializeBuffer(byte[] buffer);
+    public static native @Nullable DPacket DeserializeBuffer(@NonNull byte[] buffer, int buffer_size);
 }

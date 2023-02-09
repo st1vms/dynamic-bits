@@ -2,15 +2,15 @@
 #include <math.h>
 #include "dtypes.h"
 
-static const unsigned char __BIT_MASKS[8] = {
-    (0x1),
-    (0x2),
-    (0x4),
-    (0x8),
-    (0x10),
-    (0x20),
-    (0x40),
-    (0x80),
+static const unsigned char BIT_MASKS[8] = {
+    (1U << 0),
+    (1U << 1),
+    (1U << 2),
+    (1U << 3),
+    (1U << 4),
+    (1U << 5),
+    (1U << 6),
+    (1U << 7),
 };
 
 unsigned char GetIntBitsize(Int64 v)
@@ -293,7 +293,7 @@ char SerializeUTF8String(utf8_string_t dval,
 {
     if (NULL == buffer_p || buffer_size == 0 ||
         NULL == size_off || NULL == bit_off || *bit_off > 8 ||
-        dval.length >= MAX_STRING_LENGTH || dval.utf8_string == NULL)
+        dval.length >= MAX_STRING_LENGTH)
     {
         return 0;
     }
@@ -409,9 +409,10 @@ static unsigned char *IncrementUnsignedInteger(unsigned char *buffer,
                                                size_t *m_bytes,
                                                size_t *bit_count,
                                                unsigned char uint_bitsize,
-                                               uintptr_t *out)
+                                               uintptr_t out)
 {
-    if (out == NULL || !DeserializeArgCheck(buffer, m_bytes, bit_count, uint_bitsize))
+    UInt64 v = 0;
+    if (((UInt64*)out) == NULL || !DeserializeArgCheck(buffer, m_bytes, bit_count, uint_bitsize))
     {
         return NULL;
     }
@@ -422,17 +423,19 @@ static unsigned char *IncrementUnsignedInteger(unsigned char *buffer,
     {
         ByteIncrementCheck(&buffer, bit_count, m_bytes);
 
-        if (NULL == buffer || bit_count == NULL || out == NULL)
+        if (NULL == buffer || bit_count == NULL)
         {
             return NULL;
         }
 
-        if (*buffer & __BIT_MASKS[*bit_count])
+        if (*buffer & BIT_MASKS[*bit_count])
         {
-            *out += (1ULL << bit_pos);
+            v += (1ULL << bit_pos);
         }
         *bit_count += 1;
     }
+    *((UInt64*)out) += v;
+
     return buffer;
 }
 
@@ -450,7 +453,7 @@ static unsigned char *IncrementSignedInteger(unsigned char *buffer,
     ByteIncrementCheck(&buffer, bit_count, m_bytes);
 
     // 0 POSITIVE | 1 NEGATIVE
-    const unsigned char sign = (*buffer & __BIT_MASKS[*bit_count]) ? 1 : 0;
+    const unsigned char sign = (*buffer & BIT_MASKS[*bit_count]) ? 1 : 0;
     *bit_count += 1;
 
     UInt64 tmp = 0;
@@ -466,7 +469,7 @@ static unsigned char *IncrementSignedInteger(unsigned char *buffer,
             return NULL;
         }
 
-        if (*buffer & __BIT_MASKS[*bit_count])
+        if (*buffer & BIT_MASKS[*bit_count])
         {
             tmp += (1ULL << bit_pos);
         }
@@ -497,7 +500,7 @@ unsigned char *DeserializeBoolean(unsigned char *buffer,
 
     ByteIncrementCheck(&buffer, bit_count, m_bytes);
 
-    *out = (*buffer & __BIT_MASKS[*bit_count]) ? 1 : 0;
+    *out = (*buffer & BIT_MASKS[*bit_count]) ? 1 : 0;
     *bit_count += 1;
     return buffer;
 }
@@ -509,13 +512,12 @@ unsigned char *DeserializeUInt8(unsigned char *buffer,
                                 unsigned char is_header,
                                 UInt8 *out)
 {
-    UInt8 *v = out;
-    if (v == NULL)
+    *out = is_header ? 1 : 0;
+    if (!(buffer = IncrementUnsignedInteger(buffer, m_bytes, bit_count, uint_size, (uintptr_t)out)))
     {
         return NULL;
     }
-    *v = is_header ? 1 : 0;
-    return IncrementUnsignedInteger(buffer, m_bytes, bit_count, uint_size, (uintptr_t *)v);
+    return buffer;
 }
 
 unsigned char *DeserializeUInt16(unsigned char *buffer,
@@ -524,13 +526,12 @@ unsigned char *DeserializeUInt16(unsigned char *buffer,
                                  unsigned_int_size_t uint_size,
                                  UInt16 *out)
 {
-    UInt16 *v = out;
-    if (v == NULL)
+    *out = 0;
+    if (!(buffer = IncrementUnsignedInteger(buffer, m_bytes, bit_count, uint_size, (uintptr_t)out)))
     {
         return NULL;
     }
-    *v = 0;
-    return IncrementUnsignedInteger(buffer, m_bytes, bit_count, uint_size, (uintptr_t *)v);
+    return buffer;
 }
 
 unsigned char *DeserializeUInt32(unsigned char *buffer,
@@ -539,13 +540,12 @@ unsigned char *DeserializeUInt32(unsigned char *buffer,
                                  unsigned_int_size_t uint_size,
                                  UInt32 *out)
 {
-    UInt32 *v = out;
-    if (v == NULL)
+    *out = 0;
+    if (!(buffer = IncrementUnsignedInteger(buffer, m_bytes, bit_count, uint_size, (uintptr_t)out)))
     {
         return NULL;
     }
-    *v = 0;
-    return IncrementUnsignedInteger(buffer, m_bytes, bit_count, uint_size, (uintptr_t *)v);
+    return buffer;
 }
 
 unsigned char *DeserializeUInt64(unsigned char *buffer,
@@ -554,13 +554,12 @@ unsigned char *DeserializeUInt64(unsigned char *buffer,
                                  unsigned_int_size_t uint_size,
                                  UInt64 *out)
 {
-    UInt64 *v = out;
-    if (v == NULL)
+    *out = 0;
+    if (!(buffer = IncrementUnsignedInteger(buffer, m_bytes, bit_count, uint_size, (uintptr_t)out)))
     {
         return NULL;
     }
-    *v = 0;
-    return IncrementUnsignedInteger(buffer, m_bytes, bit_count, uint_size, (uintptr_t *)v);
+    return buffer;
 }
 
 unsigned char *DeserializeInt8(unsigned char *buffer,
@@ -643,7 +642,7 @@ unsigned char *DeserializeDouble(unsigned char *buffer,
     ByteIncrementCheck(&buffer, bit_count, m_bytes);
 
     // 0 POSITIVE | 1 NEGATIVE
-    const unsigned char sign = (*buffer & __BIT_MASKS[*bit_count]) ? 1 : 0;
+    const unsigned char sign = (*buffer & BIT_MASKS[*bit_count]) ? 1 : 0;
     *bit_count += 1;
 
     Double v = 0.0, m = 0.0;
@@ -652,7 +651,7 @@ unsigned char *DeserializeDouble(unsigned char *buffer,
          pos++)
     {
         ByteIncrementCheck(&buffer, bit_count, m_bytes);
-        if (*buffer & __BIT_MASKS[*bit_count])
+        if (*buffer & BIT_MASKS[*bit_count])
         {
             m += ldexp(1, -(pos + 1));
         }
@@ -696,11 +695,12 @@ unsigned char *DeserializeUTF8String(unsigned char *buffer,
     // Deserialize appropriate string length
     UInt16 header_value_16 = 0;
     UInt8 header_value_8 = 0;
+    UInt8 header_value = 0;
 
     if (MAX_STRING_LENGTH <= UINT8_MAX)
     {
-        if (!(buffer = DeserializeUInt8(buffer, m_bytes, bit_count, (int)HEADER8_SIZE, 1, &header_value_8)) ||
-            !(buffer = DeserializeUInt8(buffer, m_bytes, bit_count, header_value_8, 0, &header_value_8)))
+        if (!(buffer = DeserializeUInt8(buffer, m_bytes, bit_count, (int)HEADER8_SIZE, 1, &header_value)) ||
+            !(buffer = DeserializeUInt8(buffer, m_bytes, bit_count, header_value, 0, &header_value_8)))
         {
             return NULL;
         }
@@ -708,12 +708,12 @@ unsigned char *DeserializeUTF8String(unsigned char *buffer,
     }
     else if (MAX_STRING_LENGTH <= UINT16_MAX)
     {
-        if (!(buffer = DeserializeUInt8(buffer, m_bytes, bit_count, (int)HEADER16_SIZE, 1, &header_value_8)) ||
-            !(buffer = DeserializeUInt16(buffer, m_bytes, bit_count, header_value_8, &header_value_16)))
+        if (!(buffer = DeserializeUInt8(buffer, m_bytes, bit_count, (int)HEADER16_SIZE, 1, &header_value)) ||
+            !(buffer = DeserializeUInt16(buffer, m_bytes, bit_count, header_value, &header_value_16)))
         {
             return NULL;
         }
-        out->length = header_value_8;
+        out->length = header_value_16;
     }
     else
     {
@@ -739,7 +739,7 @@ unsigned char *DeserializeUTF8String(unsigned char *buffer,
 
             ByteIncrementCheck(&buffer, bit_count, m_bytes);
 
-            if (*buffer & __BIT_MASKS[*bit_count])
+            if (*buffer & BIT_MASKS[*bit_count])
             {
                 v += (1U << b);
             }

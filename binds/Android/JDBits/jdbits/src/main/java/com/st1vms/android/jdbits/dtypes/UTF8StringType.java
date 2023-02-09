@@ -4,12 +4,25 @@ import androidx.annotation.Nullable;
 
 import com.st1vms.android.jdbits.DTypes;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+
 public class UTF8StringType extends DSerializable {
 
     private String s;
 
-    public UTF8StringType(@NonNull String s){
+    public UTF8StringType(@NonNull String s) throws UnsupportedEncodingException{
+        try{
+           s.getBytes(StandardCharsets.UTF_8);
+        }
+        catch (Exception e){
+            throw new UnsupportedEncodingException();
+        }
         this.s = s;
+    }
+
+    public UTF8StringType(@NonNull byte[] bytes){
+        this.s = new String(bytes, StandardCharsets.UTF_8);
     }
 
     @Override

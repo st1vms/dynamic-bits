@@ -12,7 +12,7 @@ public class UInt32Type extends DSerializable {
 
     @Override
     public void setIntValue(int i) {
-        if(this.i < 0 || i > (1 << 31)){
+        if(i < 0){
             this.i = 0;
             return;
         }
