@@ -136,7 +136,7 @@ int main()
         FreePacket(&packet);
         return -1;
     }
-    if (!AddSerializable(&packet, UTF8_STRING_STYPE, (data_union_t){.utf8_str_v.utf8_string = "I do desire we may be better strangers", .utf8_str_v.length = strlen("I do desire we may be better strangers")}))
+    if (!AddSerializable(&packet, UTF8_STRING_STYPE, (data_union_t){.utf8_str_v.utf8_string = "I do desire we may be better strangers", .utf8_str_v.length = strlen( "I do desire we may be better strangers")}))
     {
         FreePacket(&packet);
         return -1;

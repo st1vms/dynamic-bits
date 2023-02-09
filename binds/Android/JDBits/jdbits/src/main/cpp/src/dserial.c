@@ -3,14 +3,14 @@
 #include "dtypes.h"
 
 static const unsigned char BIT_MASKS[8] = {
-    (1U << 0),
-    (1U << 1),
-    (1U << 2),
-    (1U << 3),
-    (1U << 4),
-    (1U << 5),
-    (1U << 6),
-    (1U << 7),
+        (1U << 0),
+        (1U << 1),
+        (1U << 2),
+        (1U << 3),
+        (1U << 4),
+        (1U << 5),
+        (1U << 6),
+        (1U << 7),
 };
 
 unsigned char GetIntBitsize(Int64 v)
