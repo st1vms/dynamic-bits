@@ -24,4 +24,6 @@ public class Int8Type extends DSerializable {
     public DTypes getTypeEnum() {
         return DTypes.INT8_TYPE;
     }
+
+    public static DTypes getTypeEnumValue(){return DTypes.INT8_TYPE;}
 }

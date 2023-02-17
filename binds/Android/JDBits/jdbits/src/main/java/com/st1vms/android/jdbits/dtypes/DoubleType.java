@@ -25,4 +25,5 @@ public class DoubleType extends DSerializable {
     public DTypes getTypeEnum() {
         return DTypes.DOUBLE_TYPE;
     }
+    public static DTypes getTypeEnumValue(){return DTypes.DOUBLE_TYPE;}
 }

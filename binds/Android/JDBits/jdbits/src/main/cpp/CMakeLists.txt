@@ -24,7 +24,6 @@ add_library( # Sets the name of the library.
         # Provides a relative path to your source file(s).
         jdbits.cpp
         src/dbits.c
-        src/dsem.c
         src/dpacket.c
         src/dserial.c)
 

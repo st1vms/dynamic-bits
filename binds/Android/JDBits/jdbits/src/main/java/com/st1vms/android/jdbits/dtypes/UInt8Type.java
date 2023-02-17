@@ -28,4 +28,6 @@ public class UInt8Type extends DSerializable {
     public DTypes getTypeEnum() {
         return DTypes.UINT8_TYPE;
     }
+
+    public static DTypes getTypeEnumValue(){return DTypes.UINT8_TYPE;}
 }

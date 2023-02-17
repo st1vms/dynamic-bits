@@ -6,7 +6,6 @@ include_directories(include)
 set(SOURCES
     src/dbits.c
     src/dpacket.c
-    src/dsem.c
     src/dserial.c
 )
 

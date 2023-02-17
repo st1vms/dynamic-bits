@@ -62,8 +62,6 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_st1vms_android_jdbits_DBits_nativeInit(JNIEnv *env, jclass clazz) {
 
-    InitLocks();
-
     jclass _dpacket_cls = env->FindClass("com/st1vms/android/jdbits/DPacket");
     dpacket_cls = reinterpret_cast<jclass>(env->NewGlobalRef(_dpacket_cls));
     dpacket_id_field = env->GetFieldID(dpacket_cls, "packet_id", "I");
@@ -291,7 +289,7 @@ Java_com_st1vms_android_jdbits_DBits_SerializeDPacket(JNIEnv *env, jclass clazz,
 
     jsize buffer_size = 0;
     unsigned char buf[LOCAL_BUFFER_SIZE];
-    memset(buf, 0, LOCAL_BUFFER_SIZE);
+    memset(buf, 0, LOCAL_BUFFER_SIZE*sizeof(unsigned char));
     if (!SerializePacket(buf, LOCAL_BUFFER_SIZE, &dpacket,
                          reinterpret_cast<size_t *>(&buffer_size)) ||
         buffer_size >= LOCAL_BUFFER_SIZE) {

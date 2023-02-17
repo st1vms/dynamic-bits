@@ -25,4 +25,6 @@ public class BooleanType extends DSerializable {
     public DTypes getTypeEnum() {
         return DTypes.BOOLEAN_TYPE;
     }
+
+    public static DTypes getTypeEnumValue(){return DTypes.BOOLEAN_TYPE;}
 }

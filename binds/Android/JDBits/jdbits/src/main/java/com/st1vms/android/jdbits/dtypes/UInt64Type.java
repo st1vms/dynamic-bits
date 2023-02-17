@@ -28,4 +28,6 @@ public class UInt64Type extends DSerializable {
     public DTypes getTypeEnum() {
         return DTypes.UINT64_TYPE;
     }
+
+    public static DTypes getTypeEnumValue(){return DTypes.UINT64_TYPE;}
 }

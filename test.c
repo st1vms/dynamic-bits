@@ -29,10 +29,6 @@ static int packet_format[SIZE_TEST] = {
 
 int main()
 {
-    if (!InitLocks())
-    {
-        return -1;
-    }
     dpacket_struct_t packet;
 
     if (!RegisterPacket(0, packet_format, SIZE_TEST) ||

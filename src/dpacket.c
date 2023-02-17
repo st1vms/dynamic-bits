@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <string.h>
-#include "dsem.h"
 #include "dpacket.h"
 
 static int PACKET_TABLE[PACKET_TABLE_SIZE][MAX_PACKET_FIELDS];
@@ -37,10 +36,7 @@ char RegisterPacket(packet_id_t packet_id, int *packet_format, size_t format_siz
         return 0;
     }
 
-    _register_wait();
-    // Critical Section Start
-
-    memset(PACKET_TABLE[packet_id], 0, MAX_PACKET_FIELDS);
+    memset(PACKET_TABLE[packet_id], 0, MAX_PACKET_FIELDS*sizeof(int));
     size_t i = 0;
     for (; packet_format != NULL && i < format_size; packet_format++, i++)
     {
@@ -49,13 +45,10 @@ char RegisterPacket(packet_id_t packet_id, int *packet_format, size_t format_siz
 
     if (i != format_size)
     {
-        memset(PACKET_TABLE[packet_id], 0, MAX_PACKET_FIELDS);
+        memset(PACKET_TABLE[packet_id], 0, MAX_PACKET_FIELDS*sizeof(int));
         return 0;
     }
 
-    // Critical Section End
-
-    _register_post();
     return 1;
 }
 
@@ -65,9 +58,6 @@ int *GetPacketFormat(packet_id_t packet_id, size_t *out_size)
     {
         return NULL;
     }
-
-    _getter_wait();
-    // Critical Section Start
 
     *out_size = 0;
     for (size_t i = 0; i < MAX_PACKET_FIELDS; i++)
@@ -85,15 +75,12 @@ int *GetPacketFormat(packet_id_t packet_id, size_t *out_size)
         r = PACKET_TABLE[packet_id];
     }
 
-    // Critical Section END
-    _getter_post();
-
     return r != NULL ? r : NULL;
 }
 
 char NewPacket(dpacket_t packet_p, packet_id_t packet_id)
 {
-    if (packet_p == NULL || packet_id > UINT8_MAX)
+    if (packet_p == NULL)
     {
         return 0;
     }
@@ -135,7 +122,7 @@ char AddSerializable(dpacket_t dpacket_p, serializable_type_t stype, data_union_
             return 0;
         }
 
-        memset(node_p->data.utf8_str_v.utf8_string, 0, MAX_STRING_LENGTH);
+        memset(node_p->data.utf8_str_v.utf8_string, 0, MAX_STRING_LENGTH*sizeof(UInt8));
         UInt8 * tmp = datav.utf8_str_v.utf8_string;
         for(size_t i = 0; tmp != NULL && i < node_p->data.utf8_str_v.length; tmp++, i++){
             node_p->data.utf8_str_v.utf8_string[i] = *tmp;
@@ -197,7 +184,7 @@ char AddUTF8StringSerializable(dpacket_t dpacket_p, const unsigned char * string
         .utf8_string = {0}
     };
 
-    memset(node_p->data.utf8_str_v.utf8_string, 0, MAX_STRING_LENGTH);
+    memset(node_p->data.utf8_str_v.utf8_string, 0, MAX_STRING_LENGTH*sizeof(UInt8));
     const UInt8 * tmp = string_v;
     for(size_t i = 0; tmp != NULL && i < node_p->data.utf8_str_v.length; tmp++, i++){
         node_p->data.utf8_str_v.utf8_string[i] = *tmp;

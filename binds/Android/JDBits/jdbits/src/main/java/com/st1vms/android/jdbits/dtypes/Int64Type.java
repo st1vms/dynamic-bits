@@ -24,4 +24,6 @@ public class Int64Type extends DSerializable {
     public DTypes getTypeEnum() {
         return DTypes.INT64_TYPE;
     }
+
+    public static DTypes getTypeEnumValue(){return DTypes.INT64_TYPE;}
 }

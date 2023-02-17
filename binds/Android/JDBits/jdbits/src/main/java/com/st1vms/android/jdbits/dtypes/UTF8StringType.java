@@ -39,4 +39,6 @@ public class UTF8StringType extends DSerializable {
     public DTypes getTypeEnum() {
         return DTypes.UTF8_STRING_TYPE;
     }
+
+    public static DTypes getTypeEnumValue(){return DTypes.UTF8_STRING_TYPE;}
 }

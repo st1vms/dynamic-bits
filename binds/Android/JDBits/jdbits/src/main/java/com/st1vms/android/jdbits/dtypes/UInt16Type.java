@@ -28,4 +28,6 @@ public class UInt16Type extends DSerializable {
     public DTypes getTypeEnum() {
         return DTypes.UINT16_TYPE;
     }
+
+    public static DTypes getTypeEnumValue(){return DTypes.UINT16_TYPE;}
 }

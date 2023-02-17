@@ -12,7 +12,6 @@ import com.st1vms.android.jdbits.DBits;
 import com.st1vms.android.jdbits.DPacket;
 import com.st1vms.android.jdbits.DTypes;
 import com.st1vms.android.jdbits.dtypes.BooleanType;
-import com.st1vms.android.jdbits.dtypes.DSerializable;
 import com.st1vms.android.jdbits.dtypes.DoubleType;
 import com.st1vms.android.jdbits.dtypes.Int16Type;
 import com.st1vms.android.jdbits.dtypes.Int32Type;
@@ -84,7 +83,9 @@ public class ExampleInstrumentedTest {
                     "\nSerialized to %d bytes: %s", buf.length, s));
 
             try {
-                DPacket p = DBits.DeserializeBuffer(buf, buf.length);
+
+                byte[] testBuf = {-72, 35, 4, 0, -76, -81, 74, -52, -109, 3};
+                DPacket p = DBits.DeserializeBuffer(testBuf, testBuf.length);
                 if(p == null){
                     Log.d("TAG","Deserialize Error!");
                     return;

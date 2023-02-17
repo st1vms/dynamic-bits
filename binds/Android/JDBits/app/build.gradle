@@ -1,9 +1,9 @@
 plugins {
-    id 'com.android.library'
+    id 'com.android.application'
 }
 
 android {
-    namespace 'com.st1vms.android.jdbits'
+    namespace 'com.st1vms.android.jdbits.app'
     compileSdk 33
 
     defaultConfig {
@@ -18,6 +18,8 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            jniDebuggable true
+            debuggable true
         }
         debug {
             jniDebuggable true
