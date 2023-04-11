@@ -1,15 +1,18 @@
 <a href="https://www.buymeacoffee.com/st1vms"><img src="https://img.buymeacoffee.com/button-api/?text=1 Pizza Margherita&emoji=🍕&slug=st1vms&button_colour=0fa913&font_colour=ffffff&font_family=Bree&outline_colour=ffffff&coffee_colour=FFDD00" /></a>
 # dynamic-bits
-
 ## Table of content
 
 - [Overview](#overview)
 - [Installation](#installation)
     - [Manual (Linux)](#manual-linux-installation)
+    - [Requirements (Linux)](#requirements-linux)
     - [Manual (Android)](#manual-android-installation)
+    - [Requirements (Android)](#requirements-android)
 - [Uninstalling](#uninstalling)
 - [Usage](#usage)
 - [Notes](#notes)
+
+-------------------------------------
 
 ## Overview
 
@@ -22,11 +25,17 @@ Each "packet" is defined in a packet table, a fixed number of fields is assigned
 
 Programmers must register their packets in the table before any de/serialization activity, this way thread safety can be achieved.
 
+-------------------------------------
+
 ## Installation
 
 For now only Linux manual installation option is available, along with Android binding...
 
 ## Manual-Linux-Installation
+
+### Requirements-Linux
+
+- [cmake](https://cmake.org/install/) is required in order to build this library.
 
 After downloading the git repository, move into the downloaded directory, make a build folder and generate build files using cmake.
 ```
@@ -46,6 +55,8 @@ sudo make install
 sudo ldconfig /usr/local/lib
 ```
 
+-------------------------------------
+
 ## Uninstalling
 
 Run these two commands inside project folder...
@@ -54,8 +65,10 @@ chmod u+x uninstall.sh
 sudo ./uninstall.sh
 ```
 
-## Manual-Android-Installation
+-------------------------------------
 
+## Manual-Android-Installation
+- Install [Android Studio](https://cmake.org/install/) if not already installed.
 - Open the JDBits bind project inside Android Studio
 - After syncing gradle files, open a terminal and execute this command:
     ```
@@ -66,12 +79,16 @@ You will find the generated **jdbits-<build_version>.aar** file inside the `buil
 
 Copy the AAR file into your Android project **`libs`** folder, and import is as an **`implementation`** dependency, using the Android Studio dependency manager in your Project Settings.
 
+-------------------------------------
+
 ## Usage
 
 Please refer to the examples provided in the [examples](examples/) folder, for the specific language/platform you're using...
 
 - [C-Example](examples/c-example/)
 - [Android-Java-Example](examples/android-example/app/src/main/java/com/example/dbitsandroidexample/MainActivity.java)
+
+-------------------------------------
 
 ## Notes
 
