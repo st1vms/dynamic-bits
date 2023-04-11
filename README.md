@@ -24,7 +24,7 @@ Programmers must register their packets in the table before any de/serialization
 
 ## Installation
 
-For now only Linux anual installation option is available, along with Android binding...
+For now only Linux manual installation option is available, along with Android binding...
 
 ## Manual-Linux-Installation
 
