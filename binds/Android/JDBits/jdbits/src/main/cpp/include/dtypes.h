@@ -4,13 +4,14 @@
 #include <ctype.h>
 #include <stdint.h>
 
-#define MAX_STRING_LENGTH   (0xff)
+#define MAX_STRING_LENGTH (0xff)
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
+    /** Enums holding standard bitsizes **/
     typedef enum signed_int_size_t
     {
         INT_NOSIZE = 0x0,
@@ -29,6 +30,7 @@ extern "C"
         UINT64_SIZE = 0x40
     } unsigned_int_size_t;
 
+    /** Enum holding header bitsize **/
     typedef enum data_header_size_t
     {
         NO_HEADER = 0x0,
@@ -37,6 +39,8 @@ extern "C"
         HEADER32_SIZE = 0x5,
         HEADER64_SIZE = 0x6
     } data_header_size_t;
+
+    /** Convenience typing **/
 
     typedef unsigned char Boolean;
 
@@ -52,11 +56,15 @@ extern "C"
 
     typedef double Double;
 
+    typedef UInt8 packet_id_t;
+
     typedef struct utf8_string_t
     {
         size_t length;
         UInt8 utf8_string[MAX_STRING_LENGTH];
     } utf8_string_t;
+
+    /** Data structures **/
 
     typedef union decimal_union_t
     {
@@ -82,6 +90,7 @@ extern "C"
 
     } data_union_t;
 
+    /** Enums holding serializable types **/
     typedef enum serializable_type_t
     {
         NO_TYPE = 0x0,
@@ -97,8 +106,6 @@ extern "C"
         BOOLEAN_STYPE = 0xa,
         UTF8_STRING_STYPE = 0xb,
     } serializable_type_t;
-
-    typedef UInt8 packet_id_t;
 
 #ifdef __cplusplus
 }

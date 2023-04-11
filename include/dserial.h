@@ -1,18 +1,20 @@
 #ifndef __DSERIAL_H
 
-#include "dtypes.h"
+#include <dtypes.h>
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
+    /** Utilities functions **/
     unsigned char GetIntBitsize(Int64 v);
 
     unsigned char GetUIntBitsize(UInt64 v);
 
     unsigned char GetDoubleMantissaBitsize(Double d);
 
+    /** Serialization functions **/
     char SerializeNumericalHeader(UInt8 header_value,
                                   data_header_size_t header_size,
                                   unsigned char *buffer_p,
@@ -49,6 +51,8 @@ extern "C"
                           size_t buffer_size,
                           size_t *size_off,
                           unsigned char *bit_off);
+
+    /** Deserialization functions **/
 
     unsigned char *DeserializeBoolean(unsigned char *buffer,
                                       size_t *m_bytes,

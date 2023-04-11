@@ -431,7 +431,7 @@ unsigned char *DeserializeUInt8(unsigned char *buffer,
 {
     *out = is_header ? 1 : 0;
 
-    if(out == NULL || !DeserializeArgCheck(buffer, m_bytes, bit_count, uint_size))
+    if (out == NULL || !DeserializeArgCheck(buffer, m_bytes, bit_count, uint_size))
     {
         return NULL;
     }
@@ -464,7 +464,7 @@ unsigned char *DeserializeUInt16(unsigned char *buffer,
                                  UInt16 *out)
 {
     *out = 0;
-    if(out == NULL || !DeserializeArgCheck(buffer, m_bytes, bit_count, uint_size))
+    if (out == NULL || !DeserializeArgCheck(buffer, m_bytes, bit_count, uint_size))
     {
         return NULL;
     }
@@ -497,7 +497,7 @@ unsigned char *DeserializeUInt32(unsigned char *buffer,
                                  UInt32 *out)
 {
     *out = 0;
-    if(out == NULL || !DeserializeArgCheck(buffer, m_bytes, bit_count, uint_size))
+    if (out == NULL || !DeserializeArgCheck(buffer, m_bytes, bit_count, uint_size))
     {
         return NULL;
     }
@@ -530,7 +530,7 @@ unsigned char *DeserializeUInt64(unsigned char *buffer,
                                  UInt64 *out)
 {
     *out = 0;
-    if(out == NULL || !DeserializeArgCheck(buffer, m_bytes, bit_count, uint_size))
+    if (out == NULL || !DeserializeArgCheck(buffer, m_bytes, bit_count, uint_size))
     {
         return NULL;
     }

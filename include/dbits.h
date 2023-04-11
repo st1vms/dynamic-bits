@@ -1,7 +1,7 @@
 #ifndef __DBITS_H
 
-#include "dtypes.h"
-#include "dpacket.h"
+#include <dtypes.h>
+#include <dpacket.h>
 
 #ifdef __cplusplus
 extern "C"
