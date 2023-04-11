@@ -56,18 +56,23 @@ sudo ./uninstall.sh
 
 ## Manual-Android-Installation
 
-Having android-studio folder inside $HOME directory, cd into JDBIts project folder and execute...
+- Open the JDBits bind project inside Android Studio
+- After syncing gradle files, open a terminal and execute this command:
+    ```
+    JAVA_HOME=$HOME/android-studio/jbr ./gradlew jdbits:assemble
+    ```
 
-```
-JAVA_HOME=$HOME/android-studio/jbr ./gradlew jdbits:assemble
-```
+You will find the generated **jdbits-<build_version>.aar** file inside the `build/outputs/aar` folder
+
+Copy the AAR file into your Android project **`libs`** folder, and import is as an **`implementation`** dependency, using the Android Studio dependency manager in your Project Settings.
 
 ## Usage
 
 Please refer to the examples provided in the [examples](examples/) folder, for the specific language/platform you're using...
 
 - [C-Example](examples/c-example/)
-- [Android-Java-Example](examples/android-java-example/)
+- [Android-Java-Example](examples/android-example/app/src/main/java/com/example/dbitsandroidexample/MainActivity.java)
+
 ## Notes
 
 This library doesn't still support complex structures, such as arrays, unions, dictonaries, etc...
