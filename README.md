@@ -35,14 +35,15 @@ Programmers must register their packets in the table before any de/serialization
     ```
 
 ## Before building
-
-Ensure to set optimal values for `PACKET_TABLE_SIZE` and `MAX_PACKET_FIELDS` macros. They are located in the first lines of [include/dpacket.h](include/dpacket.h)
-
-***PACKET_TABLE_SIZE** -> Max number of packets that can be registered.*
+_____________________________________
+Ensure to set optimal value for `MAX_PACKET_FIELDS` macro. It is located in the first lines of [include/dpacket.h](include/dpacket.h)
 
 ***MAX_PACKET_FIELDS** -> Max number of fields a packet can hold.*
 
-It is drastically important to tweak these two values in order to optimize space required for building the static packet table.
+It is drastically important to tweak this value in order to optimize space required for building the static packet table,
+
+
+*PacketTableByteSize = 255 * (MAX_PACKET_FIELDS) bytes*
 
 ## Building-On-Linux-CMake
 
@@ -70,15 +71,15 @@ sudo ldconfig /usr/local/lib
 - Open the JDBits bind project inside Android Studio
 
 ## Before Building ( Android )
-
-Ensure to set optimal values for `PACKET_TABLE_SIZE` and `MAX_PACKET_FIELDS` macros. They are located in the first lines of [jdbits/src/main/cpp/include/dpacket.h](binds/Android/JDBits/jdbits/src/main/cpp/include/dpacket.h)
-
-***PACKET_TABLE_SIZE** -> Max number of packets that can be registered.*
+_____________________________________
+Ensure to set optimal value for `MAX_PACKET_FIELDS` macro. It is located in the first lines of [jdbits/src/main/cpp/include/dpacket.h](binds/Android/JDBits/jdbits/src/main/cpp/include/dpacket.h)
 
 ***MAX_PACKET_FIELDS** -> Max number of fields a packet can hold.*
 
-It is drastically important to tweak these two values in order to optimize space required for building the static packet table.
+It is drastically important to tweak this value in order to optimize space required for building the static packet table.
 
+
+*PacketTableByteSize = 255 * (MAX_PACKET_FIELDS) bytes*
 
 ## Building AAR library in Android Studio
 
