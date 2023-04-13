@@ -35,8 +35,6 @@ Programmers must register their packets in the table before any de/serialization
     ```
 
 ## Before building
-_____________________________________
-
 
 Ensure to set optimal values for `PACKET_TABLE_SIZE` and `MAX_PACKET_FIELDS` macros. They are located in the first lines of [include/dpacket.h](include/dpacket.h)
 
@@ -47,7 +45,6 @@ Ensure to set optimal values for `PACKET_TABLE_SIZE` and `MAX_PACKET_FIELDS` mac
 It is drastically important to tweak these two values in order to optimize space required for building the static packet table.
 
 ## Building-On-Linux-CMake
-__________________________________
 
 After configuration is done, open a terminal inside the repository directory, make a build folder and generate build files using cmake.
 ```
@@ -73,7 +70,7 @@ sudo ldconfig /usr/local/lib
 - Open the JDBits bind project inside Android Studio
 
 ## Before Building ( Android )
-_____________________________________
+
 Ensure to set optimal values for `PACKET_TABLE_SIZE` and `MAX_PACKET_FIELDS` macros. They are located in the first lines of [jdbits/src/main/cpp/include/dpacket.h](binds/Android/JDBits/jdbits/src/main/cpp/include/dpacket.h)
 
 ***PACKET_TABLE_SIZE** -> Max number of packets that can be registered.*
@@ -84,7 +81,6 @@ It is drastically important to tweak these two values in order to optimize space
 
 
 ## Building AAR library in Android Studio
-_____________________________________
 
 - After syncing gradle files, open a terminal and execute this command:
     ```
@@ -97,7 +93,6 @@ Copy the AAR file into your Android project **`libs`** folder, and import is as 
 
 
 ## Usage
-_____________________________________
 
 Please refer to the examples provided in the [examples](examples/) folder, for the specific language/platform you're using...
 
@@ -106,7 +101,6 @@ Please refer to the examples provided in the [examples](examples/) folder, for t
 
 
 ## Notes
-_____________________________________
 
 This library doesn't still support complex structures, such as arrays, unions, dictonaries, etc...
 
@@ -114,7 +108,6 @@ I'm planning to add them very soon along with bindings for Python and Java.
 
 
 ## Uninstalling
-_____________________________________
 
 Run these two commands inside project folder...
 ```
