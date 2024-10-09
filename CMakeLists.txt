@@ -18,9 +18,6 @@ set(HEADER_FILES
 
 add_library(dynamic-bits SHARED ${SOURCES} ${HEADER_FILES})
 
-add_executable(test test.c)
-target_link_libraries(test PUBLIC dynamic-bits m)
-
 set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -29,6 +26,10 @@ set_target_properties(${PROJECT_NAME}
     PROPERTIES
     PUBLIC_HEADER "${HEADER_FILES}"
 )
+
+if (UNIX)
+    set(CMAKE_INSTALL_PREFIX "/usr")
+endif (UNIX)
 
 install(TARGETS dynamic-bits
         CONFIGURATIONS Release

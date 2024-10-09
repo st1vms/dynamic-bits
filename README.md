@@ -1,11 +1,12 @@
 <a href="https://www.buymeacoffee.com/st1vms"><img src="https://img.buymeacoffee.com/button-api/?text=1 Pizza Margherita&emoji=🍕&slug=st1vms&button_colour=0fa913&font_colour=ffffff&font_family=Bree&outline_colour=ffffff&coffee_colour=FFDD00" /></a>
 # dynamic-bits
 
+
 ## Table of content
 
 - [Overview](#overview)
 - [Linux Installation](#linux-installation)
-    - [Building on Linux (Cmake)](#building-on-linux-cmake)
+    - [Installing on Linux (Cmake)](#installing-on-linux-cmake)
 - [Android Installation](#manual-android-installation)
 - [Uninstalling](#uninstalling)
 - [Usage](#usage)
@@ -27,6 +28,7 @@ Programmers must register their packets in the table before any de/serialization
 # Linux-Installation
 
 ## Requirements
+## Requirements
 
 - [cmake](https://cmake.org/install/) is required in order to build this library.
 - Download this repository, either by zip or git using:
@@ -45,25 +47,17 @@ It is drastically important to tweak this value in order to optimize space requi
 
 *PacketTableByteSize = 255 * (MAX_PACKET_FIELDS) bytes*
 
-## Building-On-Linux-CMake
+## Installing-On-Linux-CMake
 
-After configuration is done, open a terminal inside the repository directory, make a build folder and generate build files using cmake.
+After configuration is done, open a terminal inside the repository directory, and execute these commands.
 ```
-cd ./dynamic-bits
-mkdir build
-cd build
-cmake .. && cmake --build .
+chmod u+x ./build.sh
+./build.sh && sudo make install -C build/
 ```
 
 Inside the build folder you will find the generated shared library.
 
-To install the library on Linux run these two commands inside build folder...
-
-```
-sudo make install
-sudo ldconfig /usr/local/lib
-```
-
+The library will be already installed on your system...
 
 # Manual-Android-Installation
 

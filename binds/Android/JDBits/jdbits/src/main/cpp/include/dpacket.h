@@ -1,9 +1,12 @@
 #ifndef __DPACKET_H
 
-const unsigned int PACKET_TABLE_SIZE = (1<<8)-1;
+#define PACKET_TABLE_SIZE ((1<<8)-1)
 
 // Max number of fields x packet
 #define MAX_PACKET_FIELDS 20
+
+// The result packet table,
+// will occupy 255*(MAX_PACKET_FIELDS) bytes
 
 // The result packet table,
 // will occupy 255*(MAX_PACKET_FIELDS) bytes
